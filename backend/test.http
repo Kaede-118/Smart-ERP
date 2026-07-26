@@ -1,0 +1,12 @@
+### 查询用户详情
+GET http://localhost:8080/api/users/detail/1
+
+
+### 查询用户列表
+POST http://localhost:8080/api/users/list
+Content-Type: application/json
+
+{
+  "page": 1,
+  "size": 10
+}
