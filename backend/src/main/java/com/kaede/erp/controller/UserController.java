@@ -1,42 +1,31 @@
 package com.kaede.erp.controller;
 
-
 import com.kaede.erp.common.result.Result;
-import com.kaede.erp.entity.SysUser;
 import com.kaede.erp.service.SysUserService;
+import com.kaede.erp.vo.SysUserVO;
 import org.springframework.web.bind.annotation.*;
 
 
 @RestController
-@RequestMapping("/test")
-public class TestController {
+@RequestMapping("/api/users")
+public class UserController {
 
 
     private final SysUserService sysUserService;
 
 
-    public TestController(SysUserService sysUserService){
+    public UserController(SysUserService sysUserService) {
         this.sysUserService = sysUserService;
     }
 
 
-    @GetMapping
-    public Result<String> test(){
-
-        return Result.success("ERP System Running");
-
-    }
-
-
-    @GetMapping("/user/{id}")
-    public Result<SysUser> user(
+    @GetMapping("/{id}")
+    public Result<SysUserVO> getUser(
             @PathVariable Long id
     ){
 
         return Result.success(
                 sysUserService.getUser(id)
         );
-
     }
-
 }

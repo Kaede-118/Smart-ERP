@@ -1,9 +1,9 @@
 package com.kaede.erp.service;
 
-import com.kaede.erp.entity.SysUser;
+import com.kaede.erp.vo.SysUserVO;
 
 public interface SysUserService {
 
-    SysUser getUser(Long id);
+    SysUserVO getUser(Long id);
 
 }

@@ -1,9 +1,9 @@
 package com.kaede.erp.service.impl;
 
-
 import com.kaede.erp.entity.SysUser;
 import com.kaede.erp.mapper.SysUserMapper;
 import com.kaede.erp.service.SysUserService;
+import com.kaede.erp.vo.SysUserVO;
 import org.springframework.stereotype.Service;
 
 
@@ -20,9 +20,21 @@ public class SysUserServiceImpl implements SysUserService {
 
 
     @Override
-    public SysUser getUser(Long id){
+    public SysUserVO getUser(Long id) {
 
-        return mapper.selectById(id);
+        SysUser user = mapper.selectById(id);
 
+        if (user == null) {
+            return null;
+        }
+
+        SysUserVO vo = new SysUserVO();
+
+        vo.setId(user.getId());
+        vo.setUsername(user.getUsername());
+        vo.setNickname(user.getNickname());
+        vo.setStatus(user.getStatus());
+
+        return vo;
     }
 }
