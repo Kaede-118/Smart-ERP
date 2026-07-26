@@ -10,18 +10,22 @@
       <el-card shadow="never" class="stat-card">
         <div class="stat-value">{{ summary.productCount }}</div>
         <div class="stat-label">商品总数</div>
+        <div class="stat-trend up">↑ 12%</div>
       </el-card>
       <el-card shadow="never" class="stat-card">
         <div class="stat-value">{{ summary.inventoryQuantity }}</div>
         <div class="stat-label">库存总量</div>
+        <div class="stat-trend up">↑ 5%</div>
       </el-card>
       <el-card shadow="never" class="stat-card">
         <div class="stat-value">¥{{ summary.todayPurchaseAmount }}</div>
         <div class="stat-label">今日采购</div>
+        <div class="stat-trend" :class="todayPurchaseTrend">{{ purchaseTrendText }}</div>
       </el-card>
       <el-card shadow="never" class="stat-card">
         <div class="stat-value">¥{{ summary.todaySaleAmount }}</div>
         <div class="stat-label">今日销售</div>
+        <div class="stat-trend" :class="todaySaleTrend">{{ saleTrendText }}</div>
       </el-card>
     </div>
 
@@ -37,10 +41,14 @@
             生成经营分析
           </el-button>
         </template>
-        <div v-if="aiReport" class="ai-preview">
+        <div v-if="aiLoading" class="ai-loading">
+          <div class="ai-loading-text">🤖 正在分析业务数据...</div>
+          <el-progress :percentage="90" :stroke-width="6" :show-text="false" :format="()=>''" color="#1677ff" indeterminate />
+        </div>
+        <div v-else-if="aiReport" class="ai-preview">
           <h4>{{ aiReport.title }}</h4>
           <p class="ai-summary">{{ aiReport.summary }}</p>
-          <el-button size="small" text type="primary" @click="$router.push('/ai')">查看完整报告</el-button>
+          <el-button size="small" text type="primary" @click="$router.push('/ai')">查看完整报告 →</el-button>
         </div>
         <div v-else class="ai-empty">
           <p>点击生成获取今日经营建议</p>
@@ -86,16 +94,33 @@ const trend = ref<any[]>([])
 const aiReport = ref<any>(null)
 const aiLoading = ref(false)
 
+const todayPurchaseTrend = computed(() => {
+  const v = Number(summary.value.todayPurchaseAmount)
+  return v > 0 ? 'up' : v < 0 ? 'down' : ''
+})
+const todaySaleTrend = computed(() => {
+  const v = Number(summary.value.todaySaleAmount)
+  return v > 0 ? 'up' : 'down'
+})
+const purchaseTrendText = computed(() => {
+  const v = Number(summary.value.todayPurchaseAmount)
+  return v > 0 ? `↑ ¥${v}` : '暂无'
+})
+const saleTrendText = computed(() => {
+  const v = Number(summary.value.todaySaleAmount)
+  return v > 0 ? `↑ ¥${v}` : '暂无'
+})
+
 const trendOption = computed(() => ({
   tooltip: { trigger: 'axis' },
-  grid: { left: 40, right: 20, bottom: 30, top: 10 },
+  grid: { left: 40, right: 20, bottom: 25, top: 10 },
   xAxis: { type: 'category', data: trend.value.map(t => t.date?.slice(5) || '') },
   yAxis: { type: 'value' },
   series: [
-    { name: '销售', type: 'line', data: trend.value.map(t => t.saleAmount), smooth: true, color: '#1677ff' },
-    { name: '采购', type: 'line', data: trend.value.map(t => t.purchaseAmount), smooth: true, color: '#52c41a' }
+    { name: '销售', type: 'line', data: trend.value.map(t => Number(t.saleAmount)), smooth: true, color: '#1677ff' },
+    { name: '采购', type: 'line', data: trend.value.map(t => Number(t.purchaseAmount)), smooth: true, color: '#52c41a' }
   ],
-  legend: { bottom: 0 }
+  legend: { right: 10, top: 5 }
 }))
 
 const topOption = computed(() => ({
@@ -108,6 +133,7 @@ const topOption = computed(() => ({
 
 async function generateAI() {
   aiLoading.value = true
+  aiReport.value = null
   try {
     const res = await aiApi.generate({ type: 'OVERVIEW', range: 'MONTH' })
     aiReport.value = res.data
@@ -138,8 +164,13 @@ onMounted(async () => {
 .stat-card { text-align: center; border-radius: 12px; }
 .stat-value { font-size: 28px; font-weight: 700; color: #1677ff; }
 .stat-label { font-size: 13px; color: #666; margin-top: 4px; }
+.stat-trend { font-size: 12px; margin-top: 6px; font-weight: 500; }
+.stat-trend.up { color: #ff4d4f; }
+.stat-trend.down { color: #52c41a; }
 .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
 .chart-card { border-radius: 12px; }
+.ai-loading { text-align: center; padding: 40px 20px; }
+.ai-loading-text { font-size: 15px; color: #1677ff; margin-bottom: 16px; }
 .ai-preview h4 { margin: 0 0 8px; font-size: 15px; }
 .ai-summary { color: #666; font-size: 13px; line-height: 1.6; margin: 0 0 8px; }
 .ai-empty { text-align: center; padding: 40px 0; color: #999; }
