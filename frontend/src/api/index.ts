@@ -142,3 +142,16 @@ export const rbacApi = {
     delete(id: number) { return http.delete<any, ApiResponse<null>>(`/permissions/${id}`) }
   }
 }
+
+export const expenseApi = {
+  list(params?: { keyword?: string; type?: string; status?: string; page?: number; size?: number }) {
+    return http.get<any, ApiResponse<any[]>>('/expenses', { params })
+  },
+  detail(id: number) { return http.get<any, ApiResponse<any>>(`/expenses/${id}`) },
+  create(data: any) { return http.post<any, ApiResponse<null>>('/expenses', data) },
+  update(id: number, data: any) { return http.put<any, ApiResponse<null>>(`/expenses/${id}`, data) },
+  delete(id: number) { return http.delete<any, ApiResponse<null>>(`/expenses/${id}`) },
+  approve(id: number) { return http.post<any, ApiResponse<null>>(`/expenses/${id}/approve`) },
+  reject(id: number) { return http.post<any, ApiResponse<null>>(`/expenses/${id}/reject`) },
+  pay(id: number) { return http.post<any, ApiResponse<null>>(`/expenses/${id}/pay`) }
+}

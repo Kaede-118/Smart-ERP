@@ -3,6 +3,8 @@ package com.kaede.erp.ai.service;
 
 import com.kaede.erp.service.DashboardService;
 import com.kaede.erp.service.InventoryService;
+import com.kaede.erp.dto.ExpenseSummaryDTO;
+import com.kaede.erp.service.ExpenseService;
 import com.kaede.erp.vo.DashboardWarningVO;
 import com.kaede.erp.vo.TopProductVO;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -23,16 +25,20 @@ public class ContextService {
 
     private final InventoryService inventoryService;
 
+    private final ExpenseService expenseService;
+
     private final JdbcTemplate jdbcTemplate;
 
 
     public ContextService(
             DashboardService dashboardService,
             InventoryService inventoryService,
+            ExpenseService expenseService,
             JdbcTemplate jdbcTemplate
     ) {
         this.dashboardService = dashboardService;
         this.inventoryService = inventoryService;
+        this.expenseService = expenseService;
         this.jdbcTemplate = jdbcTemplate;
     }
 
@@ -106,6 +112,7 @@ public class ContextService {
     public Map<String, Object> buildInventoryContext() {
 
         var summary = dashboardService.summary();
+        var expenseSummary = expenseService.summary();
 
         List<DashboardWarningVO> warnings = dashboardService.warnings();
 
@@ -126,6 +133,8 @@ public class ContextService {
         ctx.put("recentRecords", records.stream()
                 .map(r -> r.get("product_name") + " " + r.get("type") + " " + r.get("change_qty"))
                 .collect(Collectors.joining("\n")));
+        ctx.put("companyBalance", expenseSummary.getCompanyBalance());
+        ctx.put("monthExpense", expenseSummary.getMonthExpense());
 
         return ctx;
     }
@@ -137,6 +146,7 @@ public class ContextService {
         var trend = dashboardService.trend();
         var warnings = dashboardService.warnings();
         var top = dashboardService.topProducts();
+        var expenseSummary = expenseService.summary();
 
 
         String salesTrend = trend.stream()
@@ -164,6 +174,9 @@ public class ContextService {
         ctx.put("topProducts", top.stream()
                 .map(p -> p.getProductName() + " x" + p.getSaleQuantity() + "件")
                 .collect(Collectors.joining("\n")));
+        ctx.put("monthExpense", expenseSummary.getMonthExpense());
+        ctx.put("pendingExpenseCount", expenseSummary.getPendingCount());
+        ctx.put("companyBalance", expenseSummary.getCompanyBalance());
 
         return ctx;
     }
