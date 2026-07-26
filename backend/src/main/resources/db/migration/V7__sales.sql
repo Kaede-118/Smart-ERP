@@ -1,0 +1,37 @@
+CREATE TABLE customer (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    phone VARCHAR(20) DEFAULT NULL,
+    address VARCHAR(255) DEFAULT NULL,
+    level VARCHAR(20) DEFAULT 'NORMAL',
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted TINYINT(1) DEFAULT 0
+);
+
+CREATE TABLE sales_order (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    order_no VARCHAR(50) NOT NULL UNIQUE,
+    customer_id BIGINT NOT NULL,
+    total_amount DECIMAL(12,2) DEFAULT 0.00,
+    status VARCHAR(20) DEFAULT 'PENDING',
+    creator_id BIGINT DEFAULT NULL,
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
+    update_time DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted TINYINT(1) DEFAULT 0
+);
+
+CREATE TABLE sales_item (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    order_id BIGINT NOT NULL,
+    product_id BIGINT NOT NULL,
+    quantity INT NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    amount DECIMAL(12,2) DEFAULT 0.00,
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Seed customers
+INSERT INTO customer (name, phone, address) VALUES
+('深圳科技有限公司', '13900139001', '深圳市福田区'),
+('广州贸易有限公司', '13900139002', '广州市海珠区');
