@@ -3,12 +3,10 @@ package com.kaede.erp.entity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import java.time.LocalDateTime;
-
 
 @Data
-@TableName("account_record")
-public class AccountRecord {
+@TableName("account_transaction")
+public class AccountTransaction {
 
 
     private Long id;
@@ -26,6 +24,9 @@ public class AccountRecord {
     private String type;
 
 
+    private String changeType;
+
+
     private String businessType;
 
 
@@ -38,6 +39,6 @@ public class AccountRecord {
     private Long operatorId;
 
 
-    private LocalDateTime createTime;
+    private String createTime;
 
 }

@@ -1,0 +1,129 @@
+### ======================================
+### Company Account Module Test
+### Author: OpenCode
+### Version: v1.2
+### ======================================
+
+### 登录
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "123456"
+}
+
+> {%
+    client.global.set("token", response.body.data.token);
+%}
+
+
+### 查询企业账户
+GET http://localhost:8080/api/company-account
+Authorization: Bearer {{token}}
+
+
+### 修改企业账户
+PUT http://localhost:8080/api/company-account
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "accountName": "企业基本账户",
+  "remark": "ERP 系统主账户"
+}
+
+
+### 今日收入
+GET http://localhost:8080/api/company-account/today-income
+Authorization: Bearer {{token}}
+
+
+### 今日支出
+GET http://localhost:8080/api/company-account/today-expense
+Authorization: Bearer {{token}}
+
+
+### 余额趋势
+GET http://localhost:8080/api/company-account/trend
+Authorization: Bearer {{token}}
+
+
+### 资金流水（分页）
+GET http://localhost:8080/api/company-account/transactions?page=1&size=10
+Authorization: Bearer {{token}}
+
+
+### 资金流水（按类型筛选）
+GET http://localhost:8080/api/company-account/transactions?type=IN&page=1&size=10
+Authorization: Bearer {{token}}
+
+
+### 资金流水（按业务类型筛选）
+GET http://localhost:8080/api/company-account/transactions?businessType=PURCHASE&page=1&size=10
+Authorization: Bearer {{token}}
+
+
+### 采购入库 → 自动扣款
+POST http://localhost:8080/api/purchase/orders
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "supplierId": 1,
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 5,
+      "price": 200
+    }
+  ]
+}
+
+> {%
+    client.global.set("poId", response.body.data.id);
+%}
+
+
+POST http://localhost:8080/api/purchase/orders/{{poId}}/receive
+Authorization: Bearer {{token}}
+
+
+### 验证余额减少
+GET http://localhost:8080/api/company-account
+Authorization: Bearer {{token}}
+
+
+### 销售出库 → 自动入账
+POST http://localhost:8080/api/sales/orders
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "customerId": 1,
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 2,
+      "price": 299
+    }
+  ]
+}
+
+> {%
+    client.global.set("soId", response.body.data.id);
+%}
+
+
+POST http://localhost:8080/api/sales/orders/{{soId}}/complete
+Authorization: Bearer {{token}}
+
+
+### 验证余额增加
+GET http://localhost:8080/api/company-account
+Authorization: Bearer {{token}}
+
+
+### Dashboard 资金摘要
+GET http://localhost:8080/api/dashboard/expense-summary
+Authorization: Bearer {{token}}
