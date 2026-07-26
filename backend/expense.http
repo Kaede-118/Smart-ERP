@@ -1,0 +1,101 @@
+### ======================================
+### Expense Module Test
+### Author: OpenCode
+### Version: v1.2
+### ======================================
+
+### 登录
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "123456"
+}
+
+> {%
+    client.global.set("token", response.body.data.token);
+%}
+
+
+### 费用列表
+GET http://localhost:8080/api/expenses
+Authorization: Bearer {{token}}
+
+
+### 费用详情
+GET http://localhost:8080/api/expenses/1
+Authorization: Bearer {{token}}
+
+
+### 新增费用
+POST http://localhost:8080/api/expenses
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "employeeName": "张三",
+  "department": "销售部",
+  "type": "TRAVEL",
+  "amount": 2500.00,
+  "description": "出差费用",
+  "remark": ""
+}
+
+> {%
+    client.global.set("expenseId", response.body.data?.id || 1);
+%}
+
+
+### 修改费用
+PUT http://localhost:8080/api/expenses/{{expenseId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "amount": 3000.00,
+  "description": "出差费用（修改后）"
+}
+
+
+### 审批费用
+POST http://localhost:8080/api/expenses/{{expenseId}}/approve
+Authorization: Bearer {{token}}
+
+
+### 确认付款
+POST http://localhost:8080/api/expenses/{{expenseId}}/pay
+Authorization: Bearer {{token}}
+
+
+### 驳回费用（新增一条待审批费用来测试）
+POST http://localhost:8080/api/expenses
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "employeeName": "李四",
+  "department": "技术部",
+  "type": "OFFICE",
+  "amount": 500.00,
+  "description": "办公用品采购"
+}
+
+> {%
+    client.global.set("rejectId", response.body.data?.id || 2);
+%}
+
+
+### 驳回
+POST http://localhost:8080/api/expenses/{{rejectId}}/reject
+Authorization: Bearer {{token}}
+
+
+### Dashboard 费用摘要
+GET http://localhost:8080/api/dashboard/expense-summary
+Authorization: Bearer {{token}}
+
+
+### 删除费用
+DELETE http://localhost:8080/api/expenses/{{rejectId}}
+Authorization: Bearer {{token}}

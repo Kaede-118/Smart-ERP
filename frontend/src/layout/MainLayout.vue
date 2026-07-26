@@ -24,6 +24,10 @@
           <el-icon><TrendCharts /></el-icon>
           <span>库存管理</span>
         </el-menu-item>
+        <el-menu-item index="/expenses">
+          <el-icon><Coin /></el-icon>
+          <span>费用管理</span>
+        </el-menu-item>
         <el-menu-item index="/purchase">
           <el-icon><ShoppingCart /></el-icon>
           <span>采购管理</span>
@@ -85,7 +89,7 @@ import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import {
-  Odometer, Goods, TrendCharts, ShoppingCart, Sell,
+  Odometer, Goods, TrendCharts, Coin, ShoppingCart, Sell,
   MagicStick, Setting, SwitchButton, UserFilled
 } from '@element-plus/icons-vue'
 
