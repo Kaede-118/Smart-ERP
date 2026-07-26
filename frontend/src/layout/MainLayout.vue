@@ -54,7 +54,7 @@
       <el-header class="header">
         <div class="header-left">
           <div class="header-info">
-            <span class="greeting">👋 上午好，{{ auth.user?.nickname }}</span>
+            <span class="greeting">👋 {{ greetingTime }}，{{ auth.user?.nickname }}</span>
             <span class="header-divider" />
             <span class="header-date">{{ dateStr }}</span>
             <span class="header-weekday">{{ weekdayStr }}</span>
@@ -89,7 +89,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import {
@@ -102,9 +102,20 @@ const router = useRouter()
 const auth = useAuthStore()
 
 const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
-const now = new Date()
-const dateStr = now.toISOString().slice(0, 10)
-const weekdayStr = weekdays[now.getDay()]
+const now = ref(new Date())
+const dateStr = computed(() => {
+  const d = now.value
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+})
+const weekdayStr = computed(() => weekdays[now.value.getDay()])
+const greetingTime = computed(() => {
+  const h = now.value.getHours()
+  if (h < 6) return '凌晨好'; if (h < 9) return '早上好'
+  if (h < 12) return '上午好'; if (h < 14) return '中午好'
+  if (h < 18) return '下午好'; return '晚上好'
+})
+
+setInterval(() => { now.value = new Date() }, 60000)
 
 function logout() {
   auth.logout()
