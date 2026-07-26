@@ -38,7 +38,22 @@ public enum ResultCode {
     /**
      * 系统异常
      */
-    SYSTEM_ERROR(50000, "系统异常");
+    SYSTEM_ERROR(50000, "系统异常"),
+
+    /**
+     * 库存不足
+     */
+    INSUFFICIENT_STOCK(40001, "库存不足"),
+
+    /**
+     * 状态异常
+     */
+    INVALID_STATUS(40002, "状态异常"),
+
+    /**
+     * 编码重复
+     */
+    DUPLICATE_CODE(40003, "编码重复");
 
     private final Integer code;
     private final String message;

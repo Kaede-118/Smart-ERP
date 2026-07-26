@@ -2,18 +2,16 @@ package com.kaede.erp.service.impl;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.kaede.erp.common.context.UserContext;
+import com.kaede.erp.common.constant.ResultCode;
+import com.kaede.erp.common.enums.BusinessType;
 import com.kaede.erp.common.enums.PurchaseStatus;
 import com.kaede.erp.common.exception.BusinessException;
 import com.kaede.erp.dto.CreatePurchaseOrderDTO;
-import com.kaede.erp.entity.Inventory;
-import com.kaede.erp.entity.InventoryRecord;
 import com.kaede.erp.entity.PurchaseItem;
 import com.kaede.erp.entity.PurchaseOrder;
-import com.kaede.erp.mapper.InventoryMapper;
-import com.kaede.erp.mapper.InventoryRecordMapper;
 import com.kaede.erp.mapper.PurchaseItemMapper;
 import com.kaede.erp.mapper.PurchaseOrderMapper;
+import com.kaede.erp.service.InventoryService;
 import com.kaede.erp.service.PurchaseOrderService;
 import com.kaede.erp.vo.PurchaseItemVO;
 import com.kaede.erp.vo.PurchaseOrderVO;
@@ -24,32 +22,31 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicLong;
 
 
 @Service
 public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
 
+    private static final DateTimeFormatter ORDER_NO_FMT =
+            DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+
+
     private final PurchaseOrderMapper orderMapper;
 
     private final PurchaseItemMapper itemMapper;
 
-    private final InventoryMapper inventoryMapper;
-
-    private final InventoryRecordMapper recordMapper;
+    private final InventoryService inventoryService;
 
 
     public PurchaseOrderServiceImpl(
             PurchaseOrderMapper orderMapper,
             PurchaseItemMapper itemMapper,
-            InventoryMapper inventoryMapper,
-            InventoryRecordMapper recordMapper
+            InventoryService inventoryService
     ) {
         this.orderMapper = orderMapper;
         this.itemMapper = itemMapper;
-        this.inventoryMapper = inventoryMapper;
-        this.recordMapper = recordMapper;
+        this.inventoryService = inventoryService;
     }
 
 
@@ -57,9 +54,8 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
     @Transactional
     public PurchaseOrderVO create(CreatePurchaseOrderDTO dto, Long creatorId) {
 
-        String orderNo = "PO" + LocalDateTime.now().format(
-                DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
-        ) + (System.currentTimeMillis() % 1000);
+        String orderNo = "PO" + LocalDateTime.now().format(ORDER_NO_FMT)
+                + (System.currentTimeMillis() % 1000);
 
 
         BigDecimal total = dto.getItems().stream()
@@ -104,11 +100,14 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         PurchaseOrder order = orderMapper.selectById(orderId);
 
         if (order == null) {
-            throw new BusinessException(40000, "采购单不存在");
+            throw new BusinessException(ResultCode.NOT_FOUND);
         }
 
         if (!PurchaseStatus.DRAFT.name().equals(order.getStatus())) {
-            throw new BusinessException(40000, "当前状态不允许入库");
+            throw new BusinessException(
+                    ResultCode.INVALID_STATUS.getCode(),
+                    "当前状态不允许入库"
+            );
         }
 
 
@@ -120,39 +119,14 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
         for (PurchaseItem item : items) {
 
-            LambdaQueryWrapper<Inventory> wrapper =
-                    new LambdaQueryWrapper<>();
-            wrapper.eq(Inventory::getProductId, item.getProductId());
-
-            Inventory inv = inventoryMapper.selectOne(wrapper);
-
-            if (inv == null) {
-                inv = new Inventory();
-                inv.setProductId(item.getProductId());
-                inv.setQuantity(0);
-                inv.setWarningValue(10);
-                inventoryMapper.insert(inv);
-            }
-
-            int before = inv.getQuantity();
-            int after = before + item.getQuantity();
-
-            inv.setQuantity(after);
-            inventoryMapper.updateById(inv);
-
-
-            InventoryRecord record = new InventoryRecord();
-            record.setProductId(item.getProductId());
-            record.setChangeQty(item.getQuantity());
-            record.setBeforeQty(before);
-            record.setAfterQty(after);
-            record.setType("INBOUND");
-            record.setBusinessType("PURCHASE");
-            record.setBusinessId(orderId);
-            record.setRemark("采购入库");
-            record.setOperatorId(operatorId);
-
-            recordMapper.insert(record);
+            inventoryService.increase(
+                    item.getProductId(),
+                    item.getQuantity(),
+                    BusinessType.PURCHASE.name(),
+                    orderId,
+                    "采购入库",
+                    operatorId
+            );
         }
 
 
@@ -180,7 +154,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
         );
 
         if (vo == null) {
-            throw new BusinessException(40000, "采购单不存在");
+            throw new BusinessException(ResultCode.NOT_FOUND);
         }
 
 

@@ -19,6 +19,12 @@ public interface InventoryService {
     void adjust(Long productId, Integer changeQty, String remark, Long operatorId);
 
 
+    void increase(Long productId, Integer quantity, String businessType, Long businessId, String remark, Long operatorId);
+
+
+    void decrease(Long productId, Integer quantity, String businessType, Long businessId, String remark, Long operatorId);
+
+
     List<InventoryRecordVO> getRecords(Long productId, String type);
 
 }

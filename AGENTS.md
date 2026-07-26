@@ -10,21 +10,26 @@ docs/             设计文档，开发文档为权威基线
 
 ## 当前版本
 
-v0.4（RBAC）已完成。已完成：
+v0.9（Dashboard）已完成。已完成：
 - v0.1：项目初始化、统一返回、全局异常
 - v0.2：Spring Security + JWT 登录认证
 - v0.3：用户管理（CRUD + 重置密码）
 - v0.4：RBAC（角色/权限/分配/Spring Security 动态鉴权）
+- v0.5：商品管理（分类 + 商品 CRUD）
+- v0.6：库存管理（inventory + inventory_record 流水追溯）
+- v0.7：采购管理（采购单 + 入库 + 库存联动）
+- v0.8：销售管理（销售单 + 出库 + 库存扣减）
+- v0.9：Dashboard（聚合统计 + 趋势 + 预警 + 热销TOP）
 
 ### 版本路线
 
 ```
 v0.4 → RBAC ✅
-v0.5 → 商品管理（分类 + 商品 CRUD）✅
-v0.6 → 库存管理（ERP 核心，流水追溯）
-v0.7 → 采购管理（采购单 + 入库 + @Transactional）
-v0.8 → 销售管理（销售单 + 出库 + 库存扣减 + 事务）
-v0.9 → Dashboard（ECharts + 聚合统计）
+v0.5 → 商品管理 ✅
+v0.6 → 库存管理 ✅
+v0.7 → 采购管理 ✅
+v0.8 → 销售管理 ✅
+v0.9 → Dashboard ✅
 v1.0 → 企业增强（Redis、Docker、操作日志 AOP、文件上传、Excel 导入导出）
 v1.1 → AI 扩展（经营分析，只读数据库，不操作业务）
 ```

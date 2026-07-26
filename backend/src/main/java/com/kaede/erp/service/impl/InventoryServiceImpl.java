@@ -1,7 +1,8 @@
 package com.kaede.erp.service.impl;
 
 
-import com.kaede.erp.common.context.UserContext;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.kaede.erp.common.constant.ResultCode;
 import com.kaede.erp.common.enums.InventoryType;
 import com.kaede.erp.common.exception.BusinessException;
 import com.kaede.erp.entity.Inventory;
@@ -58,20 +59,61 @@ public class InventoryServiceImpl implements InventoryService {
     @Transactional
     public void adjust(Long productId, Integer changeQty, String remark, Long operatorId) {
 
+        changeQuantity(productId, changeQty, InventoryType.ADJUST.name(), null, null, remark, operatorId);
+    }
+
+
+    @Override
+    @Transactional
+    public void increase(Long productId, Integer quantity, String businessType, Long businessId, String remark, Long operatorId) {
+
+        if (quantity <= 0) {
+            throw new BusinessException(ResultCode.PARAM_ERROR);
+        }
+
+        changeQuantity(productId, quantity, InventoryType.INBOUND.name(), businessType, businessId, remark, operatorId);
+    }
+
+
+    @Override
+    @Transactional
+    public void decrease(Long productId, Integer quantity, String businessType, Long businessId, String remark, Long operatorId) {
+
+        if (quantity <= 0) {
+            throw new BusinessException(ResultCode.PARAM_ERROR);
+        }
+
+        changeQuantity(productId, -quantity, InventoryType.OUTBOUND.name(), businessType, businessId, remark, operatorId);
+    }
+
+
+    @Transactional
+    public void changeQuantity(
+            Long productId,
+            Integer changeQty,
+            String type,
+            String businessType,
+            Long businessId,
+            String remark,
+            Long operatorId
+    ) {
 
         if (changeQty == 0) {
-            throw new BusinessException(40000, "变更数量不能为0");
+            throw new BusinessException(ResultCode.PARAM_ERROR);
         }
 
 
-        Inventory inv = inventoryMapper.selectOne(
-                new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<Inventory>()
-                        .eq(Inventory::getProductId, productId)
-        );
+        LambdaQueryWrapper<Inventory> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Inventory::getProductId, productId);
 
+        Inventory inv = inventoryMapper.selectOne(wrapper);
 
         if (inv == null) {
-            throw new BusinessException(40000, "该商品暂无库存记录");
+            inv = new Inventory();
+            inv.setProductId(productId);
+            inv.setQuantity(0);
+            inv.setWarningValue(10);
+            inventoryMapper.insert(inv);
         }
 
 
@@ -79,7 +121,10 @@ public class InventoryServiceImpl implements InventoryService {
         int after = before + changeQty;
 
         if (after < 0) {
-            throw new BusinessException(40000, "库存不足，当前库存: " + before + ", 需求: " + (-changeQty));
+            throw new BusinessException(
+                    ResultCode.INSUFFICIENT_STOCK.getCode(),
+                    "库存不足，当前库存: " + before + ", 需求: " + (-changeQty)
+            );
         }
 
 
@@ -92,7 +137,9 @@ public class InventoryServiceImpl implements InventoryService {
         record.setChangeQty(changeQty);
         record.setBeforeQty(before);
         record.setAfterQty(after);
-        record.setType(changeQty > 0 ? InventoryType.INBOUND.name() : InventoryType.OUTBOUND.name());
+        record.setType(type);
+        record.setBusinessType(businessType);
+        record.setBusinessId(businessId);
         record.setRemark(remark);
         record.setOperatorId(operatorId);
 

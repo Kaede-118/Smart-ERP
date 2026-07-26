@@ -2,17 +2,16 @@ package com.kaede.erp.service.impl;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.kaede.erp.common.constant.ResultCode;
+import com.kaede.erp.common.enums.BusinessType;
 import com.kaede.erp.common.enums.SalesStatus;
 import com.kaede.erp.common.exception.BusinessException;
 import com.kaede.erp.dto.CreateSalesOrderDTO;
-import com.kaede.erp.entity.Inventory;
-import com.kaede.erp.entity.InventoryRecord;
 import com.kaede.erp.entity.SalesItem;
 import com.kaede.erp.entity.SalesOrder;
-import com.kaede.erp.mapper.InventoryMapper;
-import com.kaede.erp.mapper.InventoryRecordMapper;
 import com.kaede.erp.mapper.SalesItemMapper;
 import com.kaede.erp.mapper.SalesOrderMapper;
+import com.kaede.erp.service.InventoryService;
 import com.kaede.erp.service.SalesOrderService;
 import com.kaede.erp.vo.SalesItemVO;
 import com.kaede.erp.vo.SalesOrderVO;
@@ -29,25 +28,25 @@ import java.util.List;
 public class SalesOrderServiceImpl implements SalesOrderService {
 
 
+    private static final DateTimeFormatter ORDER_NO_FMT =
+            DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+
+
     private final SalesOrderMapper orderMapper;
 
     private final SalesItemMapper itemMapper;
 
-    private final InventoryMapper inventoryMapper;
-
-    private final InventoryRecordMapper recordMapper;
+    private final InventoryService inventoryService;
 
 
     public SalesOrderServiceImpl(
             SalesOrderMapper orderMapper,
             SalesItemMapper itemMapper,
-            InventoryMapper inventoryMapper,
-            InventoryRecordMapper recordMapper
+            InventoryService inventoryService
     ) {
         this.orderMapper = orderMapper;
         this.itemMapper = itemMapper;
-        this.inventoryMapper = inventoryMapper;
-        this.recordMapper = recordMapper;
+        this.inventoryService = inventoryService;
     }
 
 
@@ -55,9 +54,8 @@ public class SalesOrderServiceImpl implements SalesOrderService {
     @Transactional
     public SalesOrderVO create(CreateSalesOrderDTO dto, Long creatorId) {
 
-        String orderNo = "SO" + LocalDateTime.now().format(
-                DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
-        ) + (System.currentTimeMillis() % 1000);
+        String orderNo = "SO" + LocalDateTime.now().format(ORDER_NO_FMT)
+                + (System.currentTimeMillis() % 1000);
 
 
         BigDecimal total = dto.getItems().stream()
@@ -102,11 +100,14 @@ public class SalesOrderServiceImpl implements SalesOrderService {
         SalesOrder order = orderMapper.selectById(orderId);
 
         if (order == null) {
-            throw new BusinessException(40000, "销售单不存在");
+            throw new BusinessException(ResultCode.NOT_FOUND);
         }
 
         if (!SalesStatus.PENDING.name().equals(order.getStatus())) {
-            throw new BusinessException(40000, "当前状态不允许出库");
+            throw new BusinessException(
+                    ResultCode.INVALID_STATUS.getCode(),
+                    "当前状态不允许出库"
+            );
         }
 
 
@@ -118,38 +119,14 @@ public class SalesOrderServiceImpl implements SalesOrderService {
 
         for (SalesItem item : items) {
 
-            LambdaQueryWrapper<Inventory> wrapper =
-                    new LambdaQueryWrapper<>();
-            wrapper.eq(Inventory::getProductId, item.getProductId());
-
-            Inventory inv = inventoryMapper.selectOne(wrapper);
-
-            if (inv == null || inv.getQuantity() < item.getQuantity()) {
-                throw new BusinessException(40000,
-                        "商品库存不足: " + item.getProductId() +
-                                ", 当前库存: " + (inv != null ? inv.getQuantity() : 0) +
-                                ", 需求: " + item.getQuantity());
-            }
-
-            int before = inv.getQuantity();
-            int after = before - item.getQuantity();
-
-            inv.setQuantity(after);
-            inventoryMapper.updateById(inv);
-
-
-            InventoryRecord record = new InventoryRecord();
-            record.setProductId(item.getProductId());
-            record.setChangeQty(-item.getQuantity());
-            record.setBeforeQty(before);
-            record.setAfterQty(after);
-            record.setType("OUTBOUND");
-            record.setBusinessType("SALES");
-            record.setBusinessId(orderId);
-            record.setRemark("销售出库");
-            record.setOperatorId(operatorId);
-
-            recordMapper.insert(record);
+            inventoryService.decrease(
+                    item.getProductId(),
+                    item.getQuantity(),
+                    BusinessType.SALES.name(),
+                    orderId,
+                    "销售出库",
+                    operatorId
+            );
         }
 
 
@@ -177,7 +154,7 @@ public class SalesOrderServiceImpl implements SalesOrderService {
         );
 
         if (vo == null) {
-            throw new BusinessException(40000, "销售单不存在");
+            throw new BusinessException(ResultCode.NOT_FOUND);
         }
 
         List<SalesItemVO> items = itemMapper.selectItemsByOrderId(id)
