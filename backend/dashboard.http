@@ -1,0 +1,36 @@
+### ============================
+### Dashboard 统计测试
+### ============================
+
+### 登录
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "123456"
+}
+
+> {%
+    client.global.set("token", response.body.data.token);
+%}
+
+
+### 经营总览摘要
+GET http://localhost:8080/api/dashboard/summary
+Authorization: Bearer {{token}}
+
+
+### 近7天趋势
+GET http://localhost:8080/api/dashboard/trend
+Authorization: Bearer {{token}}
+
+
+### 库存预警
+GET http://localhost:8080/api/dashboard/warnings
+Authorization: Bearer {{token}}
+
+
+### 热销商品 TOP10
+GET http://localhost:8080/api/dashboard/top-products
+Authorization: Bearer {{token}}

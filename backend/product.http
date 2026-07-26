@@ -1,0 +1,139 @@
+### ============================
+### 商品管理测试
+### ============================
+
+### 登录
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "123456"
+}
+
+> {%
+    client.global.set("token", response.body.data.token);
+%}
+
+
+### ============================
+### 商品分类
+### ============================
+
+### 分类列表
+GET http://localhost:8080/api/product-categories
+Authorization: Bearer {{token}}
+
+
+### 新增分类
+POST http://localhost:8080/api/product-categories
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "测试分类"
+}
+
+
+### 修改分类（替换 {id} 为上一条返回的 id）
+PUT http://localhost:8080/api/product-categories/4
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "测试分类改名",
+  "status": 1
+}
+
+
+### 删除分类
+DELETE http://localhost:8080/api/product-categories/4
+Authorization: Bearer {{token}}
+
+
+### ============================
+### 商品 CRUD
+### ============================
+
+### 商品列表（含关键字搜索）
+GET http://localhost:8080/api/products/list?keyword=键盘&page=1&size=10
+Authorization: Bearer {{token}}
+
+
+### 商品列表（按分类筛选）
+GET http://localhost:8080/api/products/list?categoryId=1&page=1&size=10
+Authorization: Bearer {{token}}
+
+
+### 新增商品
+POST http://localhost:8080/api/products
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "测试商品",
+  "code": "P_TEST_01",
+  "costPrice": 50.00,
+  "salePrice": 99.00,
+  "unit": "个",
+  "status": 1
+}
+
+
+### 重复编码 → 400
+POST http://localhost:8080/api/products
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "重复商品",
+  "code": "P_TEST_01",
+  "costPrice": 10,
+  "salePrice": 20
+}
+
+
+### 商品详情（替换 {id} 为实际 id）
+GET http://localhost:8080/api/products/1
+Authorization: Bearer {{token}}
+
+
+### 修改商品（替换 {id} 为实际 id）
+PUT http://localhost:8080/api/products/1
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "机械键盘-已改",
+  "salePrice": 299.00
+}
+
+
+### 删除商品
+DELETE http://localhost:8080/api/products/1
+Authorization: Bearer {{token}}
+
+
+### ============================
+### DTO 校验测试 → 400
+### ============================
+
+### 分类名称为空
+POST http://localhost:8080/api/product-categories
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": ""
+}
+
+
+### 商品名称为空
+POST http://localhost:8080/api/products
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "",
+  "code": ""
+}
