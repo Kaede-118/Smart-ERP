@@ -4,16 +4,25 @@ package com.kaede.erp.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kaede.erp.common.constant.ResultCode;
+import com.kaede.erp.common.converter.PermissionConverter;
 import com.kaede.erp.common.converter.RoleConverter;
 import com.kaede.erp.common.exception.BusinessException;
 import com.kaede.erp.dto.CreateRoleDTO;
 import com.kaede.erp.dto.RoleQueryDTO;
 import com.kaede.erp.dto.UpdateRoleDTO;
+import com.kaede.erp.entity.SysPermission;
 import com.kaede.erp.entity.SysRole;
+import com.kaede.erp.mapper.RBACMapper;
+import com.kaede.erp.mapper.SysPermissionMapper;
 import com.kaede.erp.mapper.SysRoleMapper;
+import com.kaede.erp.mapper.SysRolePermissionMapper;
 import com.kaede.erp.service.SysRoleService;
+import com.kaede.erp.vo.SysPermissionVO;
 import com.kaede.erp.vo.SysRoleVO;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 
 @Service
@@ -22,9 +31,23 @@ public class SysRoleServiceImpl implements SysRoleService {
 
     private final SysRoleMapper mapper;
 
+    private final SysRolePermissionMapper rolePermMapper;
 
-    public SysRoleServiceImpl(SysRoleMapper mapper) {
+    private final SysPermissionMapper permMapper;
+
+    private final RBACMapper rbacMapper;
+
+
+    public SysRoleServiceImpl(
+            SysRoleMapper mapper,
+            SysRolePermissionMapper rolePermMapper,
+            SysPermissionMapper permMapper,
+            RBACMapper rbacMapper
+    ) {
         this.mapper = mapper;
+        this.rolePermMapper = rolePermMapper;
+        this.permMapper = permMapper;
+        this.rbacMapper = rbacMapper;
     }
 
 
@@ -120,6 +143,74 @@ public class SysRoleServiceImpl implements SysRoleService {
 
         mapper.deleteById(id);
 
+    }
+
+
+    @Override
+    @Transactional
+    public void assignPermissions(Long roleId, List<Long> permissionIds) {
+
+
+        SysRole role = mapper.selectById(roleId);
+        if (role == null) {
+            throw new BusinessException(ResultCode.NOT_FOUND);
+        }
+
+
+        List<Long> distinctIds = permissionIds.stream()
+                .distinct()
+                .toList();
+
+
+        if (!distinctIds.isEmpty()) {
+
+            List<SysPermission> existingPerms =
+                    permMapper.selectBatchIds(distinctIds);
+
+            if (existingPerms.size() != distinctIds.size()) {
+
+                List<Long> validIds = existingPerms
+                        .stream()
+                        .map(SysPermission::getId)
+                        .toList();
+
+                List<Long> invalidIds = distinctIds
+                        .stream()
+                        .filter(id -> !validIds.contains(id))
+                        .toList();
+
+                throw new BusinessException(
+                        40000,
+                        "权限ID不存在: " + invalidIds
+                );
+            }
+        }
+
+
+        rolePermMapper.deleteByRoleId(roleId);
+
+
+        if (!distinctIds.isEmpty()) {
+            rolePermMapper.batchInsert(roleId, distinctIds);
+        }
+
+    }
+
+
+    @Override
+    public List<SysPermissionVO> getRolePermissions(Long roleId) {
+
+        SysRole role = mapper.selectById(roleId);
+        if (role == null) {
+            throw new BusinessException(ResultCode.NOT_FOUND);
+        }
+
+        List<SysPermission> perms =
+                rbacMapper.selectPermissionsByRoleId(roleId);
+
+        return perms.stream()
+                .map(PermissionConverter::toVO)
+                .toList();
     }
 
 }

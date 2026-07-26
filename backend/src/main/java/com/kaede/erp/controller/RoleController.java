@@ -3,13 +3,17 @@ package com.kaede.erp.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kaede.erp.common.result.Result;
+import com.kaede.erp.dto.AssignPermissionDTO;
 import com.kaede.erp.dto.CreateRoleDTO;
 import com.kaede.erp.dto.RoleQueryDTO;
 import com.kaede.erp.dto.UpdateRoleDTO;
 import com.kaede.erp.service.SysRoleService;
+import com.kaede.erp.vo.SysPermissionVO;
 import com.kaede.erp.vo.SysRoleVO;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -84,6 +88,31 @@ public class RoleController {
         sysRoleService.delete(id);
 
         return Result.success();
+
+    }
+
+
+    @PutMapping("/{id}/permissions")
+    public Result<Void> assignPermissions(
+            @PathVariable Long id,
+            @RequestBody AssignPermissionDTO dto
+    ) {
+
+        sysRoleService.assignPermissions(id, dto.getPermissionIds());
+
+        return Result.success();
+
+    }
+
+
+    @GetMapping("/{id}/permissions")
+    public Result<List<SysPermissionVO>> getRolePermissions(
+            @PathVariable Long id
+    ) {
+
+        return Result.success(
+                sysRoleService.getRolePermissions(id)
+        );
 
     }
 

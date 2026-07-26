@@ -6,7 +6,10 @@ import com.kaede.erp.dto.CreateUserDTO;
 import com.kaede.erp.dto.ResetPasswordDTO;
 import com.kaede.erp.dto.UpdateUserDTO;
 import com.kaede.erp.dto.UserQueryDTO;
+import com.kaede.erp.vo.SysRoleVO;
 import com.kaede.erp.vo.SysUserVO;
+
+import java.util.List;
 
 
 public interface SysUserService {
@@ -28,5 +31,11 @@ public interface SysUserService {
 
 
     void resetPassword(Long id, ResetPasswordDTO dto);
+
+
+    void assignRoles(Long userId, List<Long> roleIds);
+
+
+    List<SysRoleVO> getUserRoles(Long userId);
 
 }

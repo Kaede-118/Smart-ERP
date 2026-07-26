@@ -2,14 +2,14 @@ package com.kaede.erp.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.kaede.erp.common.result.Result;
-import com.kaede.erp.dto.CreateUserDTO;
-import com.kaede.erp.dto.ResetPasswordDTO;
-import com.kaede.erp.dto.UpdateUserDTO;
-import com.kaede.erp.dto.UserQueryDTO;
+import com.kaede.erp.dto.*;
 import com.kaede.erp.service.SysUserService;
+import com.kaede.erp.vo.SysRoleVO;
 import com.kaede.erp.vo.SysUserVO;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -97,6 +97,31 @@ public class UserController {
         sysUserService.resetPassword(id, dto);
 
         return Result.success();
+
+    }
+
+    @PutMapping("/{id}/roles")
+    public Result<Void> assignRoles(
+            @PathVariable Long id,
+            @RequestBody AssignRoleDTO dto
+    ) {
+
+        System.out.println("进入 UserController.assignRoles");
+
+        sysUserService.assignRoles(id, dto.getRoleIds());
+
+        return Result.success();
+
+    }
+
+    @GetMapping("/{id}/roles")
+    public Result<List<SysRoleVO>> getUserRoles(
+            @PathVariable Long id
+    ) {
+
+        return Result.success(
+                sysUserService.getUserRoles(id)
+        );
 
     }
 
