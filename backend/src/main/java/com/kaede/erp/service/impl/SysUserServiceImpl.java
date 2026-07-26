@@ -1,5 +1,7 @@
 package com.kaede.erp.service.impl;
 
+import com.kaede.erp.common.constant.ResultCode;
+import com.kaede.erp.common.exception.BusinessException;
 import com.kaede.erp.entity.SysUser;
 import com.kaede.erp.mapper.SysUserMapper;
 import com.kaede.erp.service.SysUserService;
@@ -25,7 +27,11 @@ public class SysUserServiceImpl implements SysUserService {
         SysUser user = mapper.selectById(id);
 
         if (user == null) {
-            return null;
+
+            throw new BusinessException(
+                    ResultCode.USER_NOT_FOUND
+            );
+
         }
 
         SysUserVO vo = new SysUserVO();
