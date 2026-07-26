@@ -155,3 +155,11 @@ export const expenseApi = {
   reject(id: number) { return http.post<any, ApiResponse<null>>(`/expenses/${id}/reject`) },
   pay(id: number) { return http.post<any, ApiResponse<null>>(`/expenses/${id}/pay`) }
 }
+
+export const companyAccountApi = {
+  get() { return http.get<any, ApiResponse<any>>('/company-account') },
+  update(data: any) { return http.put<any, ApiResponse<null>>('/company-account', data) },
+  todayIncome() { return http.get<any, ApiResponse<any>>('/company-account/today-income') },
+  todayExpense() { return http.get<any, ApiResponse<any>>('/company-account/today-expense') },
+  trend() { return http.get<any, ApiResponse<any[]>>('/company-account/trend') }
+}

@@ -1,16 +1,13 @@
 package com.kaede.erp.service;
 
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.kaede.erp.common.context.UserContext;
 import com.kaede.erp.common.exception.BusinessException;
 import com.kaede.erp.dto.ExpenseCreateRequest;
 import com.kaede.erp.dto.ExpenseQueryRequest;
 import com.kaede.erp.dto.ExpenseSummaryDTO;
 import com.kaede.erp.dto.ExpenseUpdateRequest;
-import com.kaede.erp.entity.CompanyAccount;
 import com.kaede.erp.entity.Expense;
-import com.kaede.erp.mapper.CompanyAccountMapper;
 import com.kaede.erp.mapper.ExpenseMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,12 +30,12 @@ public class ExpenseService {
 
     private final ExpenseMapper expenseMapper;
 
-    private final CompanyAccountMapper accountMapper;
+    private final CompanyAccountService accountService;
 
 
-    public ExpenseService(ExpenseMapper expenseMapper, CompanyAccountMapper accountMapper) {
+    public ExpenseService(ExpenseMapper expenseMapper, CompanyAccountService accountService) {
         this.expenseMapper = expenseMapper;
-        this.accountMapper = accountMapper;
+        this.accountService = accountService;
     }
 
 
@@ -197,15 +194,18 @@ public class ExpenseService {
         }
 
 
-        int rows = accountMapper.deductBalance(e.getAmount());
-
-        if (rows == 0) {
-            throw new BusinessException(40001, "企业账户余额不足");
-        }
+        accountService.decrease(
+                e.getAmount(),
+                "EXPENSE",
+                id,
+                "费用付款",
+                UserContext.getUserId()
+        );
 
 
         e.setStatus("PAID");
         e.setPayTime(LocalDateTime.now());
+        e.setRemark("已通过企业账户付款");
 
         expenseMapper.updateById(e);
 
@@ -214,7 +214,7 @@ public class ExpenseService {
 
     public ExpenseSummaryDTO summary() {
 
-        CompanyAccount account = accountMapper.selectById(1L);
+        var account = accountService.getAccount();
 
         ExpenseSummaryDTO dto = new ExpenseSummaryDTO();
 

@@ -145,6 +145,7 @@ Controller 返回 Result<VO>
 ## 核心设计原则
 
 - **库存永远来源于业务，不允许直接修改库存数量** —— 所有变更通过 `inventory_record` 流水追溯
+- **资金统一通过 CompanyAccountService** —— 采购扣款、销售收款、费用支付全部走 `increase()`/`decrease()`
 - 前后端分离 + 单模块 Maven 单体架构（不拆微服务）
 
 ## Git 规范

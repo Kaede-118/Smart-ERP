@@ -15,4 +15,8 @@ public interface CompanyAccountMapper extends BaseMapper<CompanyAccount> {
     @Update("UPDATE company_account SET balance = balance - #{amount} WHERE id = 1 AND balance >= #{amount}")
     int deductBalance(BigDecimal amount);
 
+
+    @Update("UPDATE company_account SET balance = balance + #{amount} WHERE id = 1")
+    int updateBalance(BigDecimal amount);
+
 }

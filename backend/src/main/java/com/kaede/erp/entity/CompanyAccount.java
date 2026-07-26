@@ -21,6 +21,15 @@ public class CompanyAccount {
     private BigDecimal balance;
 
 
+    private String currency;
+
+
+    private Integer status;
+
+
+    private String remark;
+
+
     private LocalDateTime updateTime;
 
 }

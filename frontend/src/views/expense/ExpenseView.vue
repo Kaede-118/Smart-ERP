@@ -4,7 +4,7 @@
       <h3>费用管理</h3>
       <div class="page-actions">
         <el-select v-model="query.type" placeholder="类型" clearable style="width:120px" @change="loadData">
-          <el-option v-for="t in types" :key="t" :label="t" :value="t" />
+          <el-option v-for="o in typeOptions" :key="o.value" :label="o.label" :value="o.value" />
         </el-select>
         <el-select v-model="query.status" placeholder="状态" clearable style="width:120px" @change="loadData">
           <el-option label="待审批" value="PENDING" />
@@ -23,7 +23,9 @@
       <el-table-column prop="expense_no" label="编号" width="180" />
       <el-table-column prop="employee_name" label="员工" width="100" />
       <el-table-column prop="department" label="部门" width="100" />
-      <el-table-column prop="type" label="类型" width="100" />
+      <el-table-column prop="type" label="类型" width="100">
+        <template #default="{ row }">{{ typeLabel(row.type) }}</template>
+      </el-table-column>
       <el-table-column prop="amount" label="金额" width="120">
         <template #default="{ row }">¥{{ row.amount }}</template>
       </el-table-column>
@@ -51,7 +53,7 @@
         <el-form-item label="部门"><el-input v-model="form.department" /></el-form-item>
         <el-form-item label="费用类型">
           <el-select v-model="form.type" style="width:100%">
-            <el-option v-for="t in types" :key="t" :label="t" :value="t" />
+            <el-option v-for="o in typeOptions" :key="o.value" :label="o.label" :value="o.value" />
           </el-select>
         </el-form-item>
         <el-form-item label="金额"><el-input-number v-model="form.amount" :min="0" :precision="2" style="width:100%" /></el-form-item>
@@ -76,7 +78,7 @@
           </el-descriptions-item>
           <el-descriptions-item label="员工">{{ detail.employee_name }}</el-descriptions-item>
           <el-descriptions-item label="部门">{{ detail.department }}</el-descriptions-item>
-          <el-descriptions-item label="类型">{{ detail.type }}</el-descriptions-item>
+          <el-descriptions-item label="类型">{{ typeLabel(detail.type) }}</el-descriptions-item>
           <el-descriptions-item label="金额">¥{{ detail.amount }}</el-descriptions-item>
           <el-descriptions-item label="说明" :span="2">{{ detail.description || '--' }}</el-descriptions-item>
           <el-descriptions-item label="创建时间">{{ detail.create_time }}</el-descriptions-item>
@@ -100,11 +102,13 @@ import { ref, reactive, onMounted } from 'vue'
 import { expenseApi } from '../../api'
 import { ElMessage } from 'element-plus'
 
-const types = ['TRAVEL', 'OFFICE', 'TRANSPORT', 'ENTERTAINMENT', 'TRAINING', 'MAINTENANCE', 'OTHER']
 const typeLabels: Record<string, string> = {
   TRAVEL: '差旅', OFFICE: '办公', TRANSPORT: '交通',
   ENTERTAINMENT: '招待', TRAINING: '培训', MAINTENANCE: '维修', OTHER: '其他'
 }
+const typeOptions = Object.entries(typeLabels).map(([value, label]) => ({ value, label }))
+
+function typeLabel(key: string) { return typeLabels[key] || key }
 
 const list = ref<any[]>([])
 const query = reactive({ keyword: '', type: '', status: '', page: 1, size: 20 })
