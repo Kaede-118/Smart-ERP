@@ -23,3 +23,8 @@ mybatis-plus:
       logic-delete-field: deleted
       logic-delete-value: 1
       logic-not-delete-value: 0
+
+ai:
+  api-key: ${AI_API_KEY:sk-your-key-here}
+  model: deepseek-chat
+  api-url: https://api.deepseek.com/chat/completions

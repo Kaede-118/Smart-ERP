@@ -1,0 +1,14 @@
+CREATE TABLE ai_report (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    type VARCHAR(30) NOT NULL,
+    title VARCHAR(200) DEFAULT NULL,
+    summary VARCHAR(500) DEFAULT NULL,
+    content TEXT DEFAULT NULL,
+    prompt TEXT DEFAULT NULL,
+    model VARCHAR(50) DEFAULT NULL,
+    input_tokens INT DEFAULT 0,
+    output_tokens INT DEFAULT 0,
+    elapsed_ms BIGINT DEFAULT 0,
+    created_by BIGINT DEFAULT NULL,
+    created_time DATETIME DEFAULT CURRENT_TIMESTAMP
+);
