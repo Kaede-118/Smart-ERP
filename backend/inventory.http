@@ -1,0 +1,94 @@
+### ============================
+### 库存管理测试
+### ============================
+
+### 登录
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "123456"
+}
+
+> {%
+    client.global.set("token", response.body.data.token);
+%}
+
+
+### ============================
+### 库存查询
+### ============================
+
+### 库存列表
+GET http://localhost:8080/api/inventory/list
+Authorization: Bearer {{token}}
+
+
+### 库存列表（按关键字筛选）
+GET http://localhost:8080/api/inventory/list?keyword=键盘
+Authorization: Bearer {{token}}
+
+
+### 单品库存
+GET http://localhost:8080/api/inventory/1
+Authorization: Bearer {{token}}
+
+
+### ============================
+### 库存调整
+### ============================
+
+### 增加库存
+POST http://localhost:8080/api/inventory/adjust
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "productId": 1,
+  "changeQty": 20,
+  "remark": "盘点增加"
+}
+
+
+### 减少库存
+POST http://localhost:8080/api/inventory/adjust
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "productId": 1,
+  "changeQty": -10,
+  "remark": "盘点减少"
+}
+
+
+### 库存不足 → 40001
+POST http://localhost:8080/api/inventory/adjust
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "productId": 1,
+  "changeQty": -99999,
+  "remark": "测试不足"
+}
+
+
+### ============================
+### 库存流水
+### ============================
+
+### 查询商品1的流水
+GET http://localhost:8080/api/inventory/records?productId=1
+Authorization: Bearer {{token}}
+
+
+### 查询全部流水（按出库类型）
+GET http://localhost:8080/api/inventory/records?type=OUTBOUND
+Authorization: Bearer {{token}}
+
+
+### 查询全部流水（按入库类型）
+GET http://localhost:8080/api/inventory/records?type=INBOUND
+Authorization: Bearer {{token}}

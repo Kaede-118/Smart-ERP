@@ -1,7 +1,6 @@
 ### ============================
-### 登录
+### 登录（所有测试的基础）
 ### ============================
-
 POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
@@ -11,29 +10,27 @@ Content-Type: application/json
 }
 
 > {%
-    // 登录成功后自动保存 Token
     client.global.set("token", response.body.data.token);
+    client.global.set("roles", response.body.data.roles);
+    client.global.set("permissions", response.body.data.permissions);
 %}
 
 
 ### ============================
-### 获取当前登录用户
+### 获取当前用户（含角色权限）
 ### ============================
-
 GET http://localhost:8080/api/auth/me
 Authorization: Bearer {{token}}
 
 
 ### ============================
-### 不带 Token（应返回未登录）
+### 不带 Token → 401
 ### ============================
-
 GET http://localhost:8080/api/auth/me
 
 
 ### ============================
-### 非法 Token（应返回未登录）
+### 非法 Token → 401
 ### ============================
-
 GET http://localhost:8080/api/auth/me
-Authorization: Bearer abcdefg
+Authorization: Bearer invalidtoken

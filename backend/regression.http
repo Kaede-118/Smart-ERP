@@ -1,0 +1,459 @@
+### ======================================
+### Regression Test Suite - 全量回归测试
+### Author: OpenCode
+### Version: v1.1
+### Usage: 按顺序逐条执行，所有接口返回 code=200
+### ======================================
+
+# =======================================
+# 1. 认证模块
+# =======================================
+
+### 1.1 登录
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "123456"
+}
+
+> {%
+    client.global.set("token", response.body.data.token);
+%}
+
+
+### 1.2 当前用户
+GET http://localhost:8080/api/auth/me
+Authorization: Bearer {{token}}
+
+
+### 1.3 无 Token → 401
+GET http://localhost:8080/api/auth/me
+
+
+### 1.4 非法 Token → 401
+GET http://localhost:8080/api/auth/me
+Authorization: Bearer invalid
+
+
+# =======================================
+# 2. 用户管理
+# =======================================
+
+### 2.1 用户列表
+POST http://localhost:8080/api/users/list
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "page": 1,
+  "size": 10
+}
+
+
+### 2.2 新增用户
+POST http://localhost:8080/api/users
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "username": "testuser",
+  "password": "123456",
+  "nickname": "测试用户",
+  "status": 1
+}
+
+> {%
+    client.global.set("testUserId", response.body.data.id);
+%}
+
+
+### 2.3 修改用户
+PUT http://localhost:8080/api/users/{{testUserId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "username": "testuser",
+  "nickname": "测试用户已改",
+  "status": 1
+}
+
+
+### 2.4 用户详情
+GET http://localhost:8080/api/users/detail/1
+Authorization: Bearer {{token}}
+
+
+### 2.5 删除用户
+DELETE http://localhost:8080/api/users/{{testUserId}}
+Authorization: Bearer {{token}}
+
+
+### 2.6 重置密码
+PUT http://localhost:8080/api/users/1/reset-password
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "newPassword": "123456"
+}
+
+
+# =======================================
+# 3. RBAC — 角色
+# =======================================
+
+### 3.1 角色列表
+GET http://localhost:8080/api/roles
+Authorization: Bearer {{token}}
+
+
+### 3.2 新增角色
+POST http://localhost:8080/api/roles
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "roleName": "回归角色",
+  "roleCode": "REGRESSION",
+  "description": "回归测试"
+}
+
+> {%
+    client.global.set("roleId", response.body.data.id);
+%}
+
+
+### 3.3 修改角色
+PUT http://localhost:8080/api/roles/{{roleId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "roleName": "回归角色已改",
+  "description": "回归测试已改"
+}
+
+
+### 3.4 删除角色
+DELETE http://localhost:8080/api/roles/{{roleId}}
+Authorization: Bearer {{token}}
+
+
+# =======================================
+# 4. RBAC — 权限
+# =======================================
+
+### 4.1 权限列表
+GET http://localhost:8080/api/permissions
+Authorization: Bearer {{token}}
+
+
+### 4.2 新增权限
+POST http://localhost:8080/api/permissions
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "回归权限",
+  "code": "regression:test"
+}
+
+
+# =======================================
+# 5. 商品分类
+# =======================================
+
+### 5.1 分类列表
+GET http://localhost:8080/api/product-categories
+Authorization: Bearer {{token}}
+
+
+### 5.2 新增分类
+POST http://localhost:8080/api/product-categories
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "回归分类"
+}
+
+> {%
+    client.global.set("categoryId", response.body.data.id);
+%}
+
+
+### 5.3 删除分类
+DELETE http://localhost:8080/api/product-categories/{{categoryId}}
+Authorization: Bearer {{token}}
+
+
+# =======================================
+# 6. 商品
+# =======================================
+
+### 6.1 商品列表
+POST http://localhost:8080/api/products/list
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "page": 1,
+  "size": 10
+}
+
+
+### 6.2 新增商品
+POST http://localhost:8080/api/products
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "回归商品",
+  "code": "P_REGRESSION",
+  "costPrice": 10,
+  "salePrice": 20,
+  "unit": "个"
+}
+
+> {%
+    client.global.set("productId", response.body.data.id);
+%}
+
+
+### 6.3 商品详情
+GET http://localhost:8080/api/products/{{productId}}
+Authorization: Bearer {{token}}
+
+
+### 6.4 修改商品
+PUT http://localhost:8080/api/products/{{productId}}
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "回归商品已改",
+  "salePrice": 25
+}
+
+
+### 6.5 删除商品
+DELETE http://localhost:8080/api/products/{{productId}}
+Authorization: Bearer {{token}}
+
+
+### 6.6 重复编码 → 400
+POST http://localhost:8080/api/products
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "重复",
+  "code": "P001"
+}
+
+
+# =======================================
+# 7. 库存
+# =======================================
+
+### 7.1 库存列表
+GET http://localhost:8080/api/inventory/list
+Authorization: Bearer {{token}}
+
+
+### 7.2 单品库存
+GET http://localhost:8080/api/inventory/1
+Authorization: Bearer {{token}}
+
+
+### 7.3 库存调整（增加）
+POST http://localhost:8080/api/inventory/adjust
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "productId": 1,
+  "changeQty": 5,
+  "remark": "回归测试"
+}
+
+
+### 7.4 库存流水
+GET http://localhost:8080/api/inventory/records?productId=1
+Authorization: Bearer {{token}}
+
+
+### 7.5 库存不足 → 40001
+POST http://localhost:8080/api/inventory/adjust
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "productId": 1,
+  "changeQty": -99999,
+  "remark": "回归测试不足"
+}
+
+
+# =======================================
+# 8. 采购
+# =======================================
+
+### 8.1 供应商列表
+GET http://localhost:8080/api/suppliers
+Authorization: Bearer {{token}}
+
+
+### 8.2 创建采购单
+POST http://localhost:8080/api/purchase/orders
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "supplierId": 1,
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 10,
+      "price": 200
+    }
+  ]
+}
+
+> {%
+    client.global.set("purchaseOrderId", response.body.data.id);
+%}
+
+
+### 8.3 完成入库
+POST http://localhost:8080/api/purchase/orders/{{purchaseOrderId}}/receive
+Authorization: Bearer {{token}}
+
+
+### 8.4 重复入库 → 400
+POST http://localhost:8080/api/purchase/orders/{{purchaseOrderId}}/receive
+Authorization: Bearer {{token}}
+
+
+# =======================================
+# 9. 销售
+# =======================================
+
+### 9.1 客户列表
+GET http://localhost:8080/api/customers
+Authorization: Bearer {{token}}
+
+
+### 9.2 创建销售单
+POST http://localhost:8080/api/sales/orders
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "customerId": 1,
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 3,
+      "price": 299
+    }
+  ]
+}
+
+> {%
+    client.global.set("salesOrderId", response.body.data.id);
+%}
+
+
+### 9.3 完成出库
+POST http://localhost:8080/api/sales/orders/{{salesOrderId}}/complete
+Authorization: Bearer {{token}}
+
+
+### 9.4 重复出库 → 400
+POST http://localhost:8080/api/sales/orders/{{salesOrderId}}/complete
+Authorization: Bearer {{token}}
+
+
+### 9.5 库存不足 → 40001
+POST http://localhost:8080/api/sales/orders
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "customerId": 1,
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 99999,
+      "price": 299
+    }
+  ]
+}
+
+> {%
+    client.global.set("overOrderId", response.body.data.id);
+%}
+
+
+POST http://localhost:8080/api/sales/orders/{{overOrderId}}/complete
+Authorization: Bearer {{token}}
+
+
+# =======================================
+# 10. Dashboard
+# =======================================
+
+### 10.1 经营摘要
+GET http://localhost:8080/api/dashboard/summary
+Authorization: Bearer {{token}}
+
+
+### 10.2 趋势
+GET http://localhost:8080/api/dashboard/trend
+Authorization: Bearer {{token}}
+
+
+### 10.3 库存预警
+GET http://localhost:8080/api/dashboard/warnings
+Authorization: Bearer {{token}}
+
+
+### 10.4 热销 TOP
+GET http://localhost:8080/api/dashboard/top-products
+Authorization: Bearer {{token}}
+
+
+# =======================================
+# 11. AI
+# =======================================
+
+### 11.1 历史报告
+GET http://localhost:8080/api/ai/reports
+Authorization: Bearer {{token}}
+
+
+### 11.2 生成经营概览
+POST http://localhost:8080/api/ai/reports
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "type": "OVERVIEW",
+  "range": "MONTH"
+}
+
+> {%
+    client.global.set("reportId", response.body.data.id);
+%}
+
+
+### 11.3 报告详情
+GET http://localhost:8080/api/ai/reports/{{reportId}}
+Authorization: Bearer {{token}}
+
+
+### --- Regression Test 结束 ---

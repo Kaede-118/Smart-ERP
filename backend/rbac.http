@@ -1,0 +1,135 @@
+### ============================
+### 角色 CRUD
+### ============================
+
+### 登录
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "123456"
+}
+
+> {%
+    client.global.set("token", response.body.data.token);
+%}
+
+
+### 查询角色列表
+GET http://localhost:8080/api/roles
+Authorization: Bearer {{token}}
+
+
+### 查询角色详情
+GET http://localhost:8080/api/roles/1
+Authorization: Bearer {{token}}
+
+
+### 新增角色
+POST http://localhost:8080/api/roles
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "roleName": "测试角色",
+  "roleCode": "TEST_ROLE",
+  "description": "用于测试"
+}
+
+
+### 修改角色（替换 {id} 为上一条返回的 id）
+PUT http://localhost:8080/api/roles/4
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "roleName": "测试角色已改名",
+  "description": "已修改"
+}
+
+
+### 删除角色
+DELETE http://localhost:8080/api/roles/4
+Authorization: Bearer {{token}}
+
+
+### ============================
+### 权限 CRUD
+### ============================
+
+### 查询全部权限
+GET http://localhost:8080/api/permissions
+Authorization: Bearer {{token}}
+
+
+### 新增权限
+POST http://localhost:8080/api/permissions
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "测试权限",
+  "code": "test:perm"
+}
+
+
+### ============================
+### 分配角色给用户
+### ============================
+
+### 查看用户当前角色
+GET http://localhost:8080/api/users/1/roles
+Authorization: Bearer {{token}}
+
+
+### 给 admin 分配 ADMIN 角色
+PUT http://localhost:8080/api/users/1/roles
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "roleIds": [1]
+}
+
+
+### ============================
+### 分配权限给角色
+### ============================
+
+### 查看角色权限
+GET http://localhost:8080/api/roles/1/permissions
+Authorization: Bearer {{token}}
+
+
+### 给 ADMIN 角色分配全部权限
+PUT http://localhost:8080/api/roles/1/permissions
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "permissionIds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+}
+
+
+### ============================
+### 权限拦截测试（以下操作将被 403）
+### ============================
+
+### 用 sales1 登录
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "sales1",
+  "password": "123456"
+}
+
+> {%
+    client.global.set("salesToken", response.body.data.token);
+%}
+
+
+### sales1 访问角色列表 → 403（无 role:list 权限）
+GET http://localhost:8080/api/roles
+Authorization: Bearer {{salesToken}}

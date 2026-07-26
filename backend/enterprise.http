@@ -1,0 +1,92 @@
+### ======================================
+### Enterprise Module Test
+### Author: OpenCode
+### Version: v1.1
+### ======================================
+
+### 登录
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "123456"
+}
+
+> {%
+    client.global.set("token", response.body.data.token);
+%}
+
+
+### ============================
+### 文件上传
+### ============================
+
+### 上传文件
+POST http://localhost:8080/api/files/upload
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=boundary123
+
+--boundary123
+Content-Disposition: form-data; name="file"; filename="test.txt"
+Content-Type: text/plain
+
+Hello ERP System!
+--boundary123--
+
+
+### ============================
+### Excel 导出
+### ============================
+
+### 导出商品数据
+GET http://localhost:8080/api/excel/products/export
+Authorization: Bearer {{token}}
+Accept: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+
+
+### ============================
+### （可选）Excel 导入
+### ============================
+
+### 导入商品数据（需要准备 products.xlsx 文件）
+# POST http://localhost:8080/api/excel/products/import
+# Authorization: Bearer {{token}}
+# Content-Type: multipart/form-data; boundary=boundary123
+#
+# --boundary123
+# Content-Disposition: form-data; name="file"; filename="products.xlsx"
+# Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+#
+# < /path/to/products.xlsx
+# --boundary123--
+
+
+### ============================
+### 边界测试
+### ============================
+
+### 上传 .exe 文件（应被后续扩展限制）
+POST http://localhost:8080/api/files/upload
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=boundary123
+
+--boundary123
+Content-Disposition: form-data; name="file"; filename="malware.exe"
+Content-Type: application/octet-stream
+
+malicious code here
+--boundary123--
+
+
+### 空参数上传（无文件字段 → 400）
+POST http://localhost:8080/api/files/upload
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data; boundary=boundary123
+
+--boundary123
+Content-Disposition: form-data; name="notfile"; filename="nope.txt"
+Content-Type: text/plain
+
+nothing
+--boundary123--

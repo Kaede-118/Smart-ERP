@@ -1,0 +1,112 @@
+### ======================================
+### AI Module Test
+### Author: OpenCode
+### Version: v1.1
+### ======================================
+
+### 登录
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "123456"
+}
+
+> {%
+    client.global.set("token", response.body.data.token);
+%}
+
+
+### ============================
+### Happy Path - 生成报告
+### ============================
+
+### 经营概览（约 5-10 秒）
+POST http://localhost:8080/api/ai/reports
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "type": "OVERVIEW",
+  "range": "MONTH"
+}
+
+> {%
+    client.global.set("reportId", response.body.data.id);
+%}
+
+
+### 销售分析
+POST http://localhost:8080/api/ai/reports
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "type": "SALES",
+  "range": "MONTH"
+}
+
+
+### 库存分析
+POST http://localhost:8080/api/ai/reports
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "type": "INVENTORY",
+  "range": "MONTH"
+}
+
+
+### ============================
+### 查询报告
+### ============================
+
+### 历史列表
+GET http://localhost:8080/api/ai/reports
+Authorization: Bearer {{token}}
+
+
+### 单条详情
+GET http://localhost:8080/api/ai/reports/{{reportId}}
+Authorization: Bearer {{token}}
+
+
+### ============================
+### 边界测试 → 400
+### ============================
+
+### 空参数
+POST http://localhost:8080/api/ai/reports
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{}
+
+
+### 非法 type
+POST http://localhost:8080/api/ai/reports
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "type": "INVALID_TYPE",
+  "range": "MONTH"
+}
+
+
+### 超长时间范围
+POST http://localhost:8080/api/ai/reports
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "type": "OVERVIEW",
+  "range": "2010-01-01_TO_2026-12-31"
+}
+
+
+### 报告不存在 → 404
+GET http://localhost:8080/api/ai/reports/999999
+Authorization: Bearer {{token}}

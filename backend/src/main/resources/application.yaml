@@ -25,6 +25,6 @@ mybatis-plus:
       logic-not-delete-value: 0
 
 ai:
-  api-key: ${AI_API_KEY:sk-your-key-here}
-  model: deepseek-chat
+  api-key: ${AI_API_KEY:sk-replaced-000000000000000000000000000000}
+  model: deepseek-v4-flash
   api-url: https://api.deepseek.com/chat/completions

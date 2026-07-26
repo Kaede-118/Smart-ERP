@@ -1,0 +1,127 @@
+### ============================
+### 销售管理测试
+### ============================
+
+### 登录
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "123456"
+}
+
+> {%
+    client.global.set("token", response.body.data.token);
+%}
+
+
+### ============================
+### 客户
+### ============================
+
+### 客户列表
+GET http://localhost:8080/api/customers
+Authorization: Bearer {{token}}
+
+
+### 新增客户
+POST http://localhost:8080/api/customers
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "测试客户",
+  "phone": "13900000000",
+  "address": "测试地址"
+}
+
+
+### ============================
+### 销售单
+### ============================
+
+### 创建销售单（PENDING，库存不变）
+POST http://localhost:8080/api/sales/orders
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "customerId": 1,
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 5,
+      "price": 299.00
+    },
+    {
+      "productId": 2,
+      "quantity": 10,
+      "price": 89.00
+    }
+  ]
+}
+
+> {%
+    client.global.set("salesOrderId", response.body.data.id);
+%}
+
+
+### 验证创建后库存不变
+GET http://localhost:8080/api/inventory/1
+Authorization: Bearer {{token}}
+
+
+### 查询销售单列表
+GET http://localhost:8080/api/sales/orders
+Authorization: Bearer {{token}}
+
+
+### 查询销售单详情
+GET http://localhost:8080/api/sales/orders/{{salesOrderId}}
+Authorization: Bearer {{token}}
+
+
+### 完成出库（库存扣减）
+POST http://localhost:8080/api/sales/orders/{{salesOrderId}}/complete
+Authorization: Bearer {{token}}
+
+
+### 验证库存减少
+GET http://localhost:8080/api/inventory/1
+Authorization: Bearer {{token}}
+
+
+### 重复出库 → 400
+POST http://localhost:8080/api/sales/orders/{{salesOrderId}}/complete
+Authorization: Bearer {{token}}
+
+
+### ============================
+### 库存不足测试
+### ============================
+
+### 创建超量销售单
+POST http://localhost:8080/api/sales/orders
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "customerId": 1,
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 99999,
+      "price": 299
+    }
+  ]
+}
+
+> {%
+    client.global.set("overOrderId", response.body.data.id);
+%}
+
+
+### 出库 → 40001 库存不足
+POST http://localhost:8080/api/sales/orders/{{overOrderId}}/complete
+Authorization: Bearer {{token}}

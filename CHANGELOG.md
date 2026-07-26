@@ -1,11 +1,37 @@
 # Changelog
 
-## v0.4.4 (2026-07-27)
+## v1.1 (2026-07-27)
 
-**Dynamic Authorization with Spring Security**
+**AI Business Analysis**
 
-- JWT 令牌嵌入权限列表，每个请求从 Token 直接提取权限
-- `SecurityUser` 从 `permissionCodes` 动态构造 `GrantedAuthority`
+- 经营分析报告生成（销售分析 / 库存分析 / 经营概览）
+- 四层 AI 架构：AiService → ContextService + PromptService → AIClient
+- Prompt 模板外置到 `prompt/*.md`，无需重新编译即可修改
+- `AIClient` 接口封装 DeepSeek API，支持切换模型供应商
+- 报告持久化到 `ai_report` 表，支持历史回溯
+- AI 只读业务数据，不操作业务表
+
+## v1.0 (2026-07-27)
+
+**Enterprise Enhancement**
+
+- Docker 容器化部署（Dockerfile + docker-compose）
+- 操作日志 AOP（@OperationLog 注解 + @Aspect 切面）
+- 文件上传（POST /api/files/upload）
+- Excel 导入导出（EasyExcel 实现商品导出/导入）
+- `InventoryService` 统一库存变更入口，采购/销售不再直接操作 Mapper
+- 新增 `ResultCode.INSUFFICIENT_STOCK` / `INVALID_STATUS` / `DUPLICATE_CODE`
+- 全局异常新增 `MethodArgumentNotValidException` 处理
+
+## v0.9 (2026-07-27)
+
+**Dashboard Statistics**
+
+- 经营总览摘要（COUNT / SUM 聚合 SQL）
+- 近 7 天采购/销售趋势合并
+- 低库存预警列表
+- 热销商品 TOP10
+- `DashboardMapper` 纯 SQL 聚合，无 Java 计算
 - 用户登录时联表查询角色+权限，写入 SecurityContext
 - 启用 `@EnableMethodSecurity`，支持 `@PreAuthorize`
 - 全局异常处理器新增 `AccessDeniedException` → HTTP 403

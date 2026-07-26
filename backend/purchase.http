@@ -1,0 +1,93 @@
+### ============================
+### 采购管理测试
+### ============================
+
+### 登录
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "123456"
+}
+
+> {%
+    client.global.set("token", response.body.data.token);
+%}
+
+
+### ============================
+### 供应商
+### ============================
+
+### 供应商列表
+GET http://localhost:8080/api/suppliers
+Authorization: Bearer {{token}}
+
+
+### 新增供应商
+POST http://localhost:8080/api/suppliers
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "name": "测试供应商",
+  "contact": "王五",
+  "phone": "13800000000",
+  "address": "测试地址"
+}
+
+
+### ============================
+### 采购单
+### ============================
+
+### 创建采购单（DRAFT）
+POST http://localhost:8080/api/purchase/orders
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "supplierId": 1,
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 20,
+      "price": 200.00
+    },
+    {
+      "productId": 2,
+      "quantity": 50,
+      "price": 45.00
+    }
+  ]
+}
+
+> {%
+    client.global.set("purchaseOrderId", response.body.data.id);
+%}
+
+
+### 查询采购单列表
+GET http://localhost:8080/api/purchase/orders
+Authorization: Bearer {{token}}
+
+
+### 查询采购单详情
+GET http://localhost:8080/api/purchase/orders/{{purchaseOrderId}}
+Authorization: Bearer {{token}}
+
+
+### 完成入库（库存增加）
+POST http://localhost:8080/api/purchase/orders/{{purchaseOrderId}}/receive
+Authorization: Bearer {{token}}
+
+
+### 验证库存（库存应增加）
+GET http://localhost:8080/api/inventory/1
+Authorization: Bearer {{token}}
+
+
+### 重复入库 → 400
+POST http://localhost:8080/api/purchase/orders/{{purchaseOrderId}}/receive
+Authorization: Bearer {{token}}

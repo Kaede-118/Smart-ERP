@@ -1,0 +1,63 @@
+### ======================================
+### Smoke Test - 冒烟测试（5分钟快速验证）
+### Author: OpenCode
+### Version: v1.1
+### Expected: 所有接口返回 code=200
+### ======================================
+
+### 1. 登录
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "admin",
+  "password": "123456"
+}
+
+> {%
+    client.global.set("token", response.body.data.token);
+%}
+
+
+### 2. 当前用户
+GET http://localhost:8080/api/auth/me
+Authorization: Bearer {{token}}
+
+
+### 3. Dashboard 摘要
+GET http://localhost:8080/api/dashboard/summary
+Authorization: Bearer {{token}}
+
+
+### 4. 商品列表
+POST http://localhost:8080/api/products/list
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "page": 1,
+  "size": 5
+}
+
+
+### 5. 库存列表
+GET http://localhost:8080/api/inventory/list
+Authorization: Bearer {{token}}
+
+
+### 6. 角色列表（验证 RBAC 权限正常）
+GET http://localhost:8080/api/roles
+Authorization: Bearer {{token}}
+
+
+### 7. AI 报告历史（验证 AI 模块加载正常）
+GET http://localhost:8080/api/ai/reports
+Authorization: Bearer {{token}}
+
+
+### 8. 无 Token 访问 → 401
+GET http://localhost:8080/api/roles
+
+
+### --- Smoke Test 结束 ---
+### 如果以上全部返回 code=200（末条为 401），系统通过冒烟测试。
