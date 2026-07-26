@@ -19,6 +19,7 @@ const router = createRouter({
         { path: 'inventory', name: 'Inventory', component: () => import('../views/inventory/InventoryView.vue') },
         { path: 'expenses', name: 'Expenses', component: () => import('../views/expense/ExpenseView.vue') },
         { path: 'purchase', name: 'Purchase', component: () => import('../views/purchase/PurchaseView.vue') },
+        { path: 'fund', name: 'Fund', component: () => import('../views/fund/FundView.vue') },
         { path: 'sales', name: 'Sales', component: () => import('../views/sales/SalesView.vue') },
         { path: 'ai', name: 'AI', component: () => import('../views/ai/AIView.vue') },
         { path: 'rbac', name: 'RBAC', component: () => import('../views/rbac/RBACView.vue') }

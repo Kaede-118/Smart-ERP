@@ -11,6 +11,7 @@ import com.kaede.erp.entity.SalesItem;
 import com.kaede.erp.entity.SalesOrder;
 import com.kaede.erp.mapper.SalesItemMapper;
 import com.kaede.erp.mapper.SalesOrderMapper;
+import com.kaede.erp.service.CompanyAccountService;
 import com.kaede.erp.service.InventoryService;
 import com.kaede.erp.service.SalesOrderService;
 import com.kaede.erp.vo.SalesItemVO;
@@ -38,15 +39,19 @@ public class SalesOrderServiceImpl implements SalesOrderService {
 
     private final InventoryService inventoryService;
 
+    private final CompanyAccountService accountService;
+
 
     public SalesOrderServiceImpl(
             SalesOrderMapper orderMapper,
             SalesItemMapper itemMapper,
-            InventoryService inventoryService
+            InventoryService inventoryService,
+            CompanyAccountService accountService
     ) {
         this.orderMapper = orderMapper;
         this.itemMapper = itemMapper;
         this.inventoryService = inventoryService;
+        this.accountService = accountService;
     }
 
 
@@ -128,6 +133,15 @@ public class SalesOrderServiceImpl implements SalesOrderService {
                     operatorId
             );
         }
+
+
+        accountService.increase(
+                order.getTotalAmount(),
+                "SALES",
+                orderId,
+                "销售收款",
+                operatorId
+        );
 
 
         order.setStatus(SalesStatus.COMPLETED.name());

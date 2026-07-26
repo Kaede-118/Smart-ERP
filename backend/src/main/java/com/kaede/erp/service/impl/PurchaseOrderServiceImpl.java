@@ -11,6 +11,7 @@ import com.kaede.erp.entity.PurchaseItem;
 import com.kaede.erp.entity.PurchaseOrder;
 import com.kaede.erp.mapper.PurchaseItemMapper;
 import com.kaede.erp.mapper.PurchaseOrderMapper;
+import com.kaede.erp.service.CompanyAccountService;
 import com.kaede.erp.service.InventoryService;
 import com.kaede.erp.service.PurchaseOrderService;
 import com.kaede.erp.vo.PurchaseItemVO;
@@ -38,15 +39,19 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
     private final InventoryService inventoryService;
 
+    private final CompanyAccountService accountService;
+
 
     public PurchaseOrderServiceImpl(
             PurchaseOrderMapper orderMapper,
             PurchaseItemMapper itemMapper,
-            InventoryService inventoryService
+            InventoryService inventoryService,
+            CompanyAccountService accountService
     ) {
         this.orderMapper = orderMapper;
         this.itemMapper = itemMapper;
         this.inventoryService = inventoryService;
+        this.accountService = accountService;
     }
 
 
@@ -128,6 +133,15 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
                     operatorId
             );
         }
+
+
+        accountService.decrease(
+                order.getTotalAmount(),
+                "PURCHASE",
+                orderId,
+                "采购付款",
+                operatorId
+        );
 
 
         order.setStatus(PurchaseStatus.RECEIVED.name());
