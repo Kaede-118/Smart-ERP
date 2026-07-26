@@ -153,9 +153,36 @@ public class CompanyAccountService {
 
 
     public List<Map<String, Object>> trend() {
-        return transactionMapper.selectTrend(
-                LocalDateTime.now().minusDays(7).toString().substring(0, 10)
-        );
+
+        String since = LocalDateTime.now().minusDays(7).toString().substring(0, 10);
+
+        List<Map<String, Object>> daily = transactionMapper.selectTrend(since);
+
+        if (daily.isEmpty()) {
+            return daily;
+        }
+
+
+        BigDecimal startBalance = transactionMapper.balanceBefore(since);
+
+        if (startBalance == null || startBalance.compareTo(BigDecimal.ZERO) == 0) {
+            startBalance = getAccount().getBalance();
+            for (Map<String, Object> row : daily) {
+                BigDecimal income = new BigDecimal(row.get("income").toString());
+                BigDecimal expense = new BigDecimal(row.get("expense").toString());
+                startBalance = startBalance.subtract(income).add(expense);
+                row.put("balance", startBalance);
+            }
+        } else {
+            for (Map<String, Object> row : daily) {
+                BigDecimal income = new BigDecimal(row.get("income").toString());
+                BigDecimal expense = new BigDecimal(row.get("expense").toString());
+                startBalance = startBalance.add(income).subtract(expense);
+                row.put("balance", startBalance);
+            }
+        }
+
+        return daily;
     }
 
 

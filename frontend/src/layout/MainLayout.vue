@@ -16,33 +16,33 @@
           <el-icon><Odometer /></el-icon>
           <span>Dashboard</span>
         </el-menu-item>
-        <el-menu-item index="/products">
-          <el-icon><Goods /></el-icon>
-          <span>商品管理</span>
-        </el-menu-item>
-        <el-menu-item index="/inventory">
-          <el-icon><TrendCharts /></el-icon>
-          <span>库存管理</span>
+        <el-menu-item index="/fund">
+          <el-icon><Wallet /></el-icon>
+          <span>资金管理</span>
         </el-menu-item>
         <el-menu-item index="/expenses">
           <el-icon><Coin /></el-icon>
           <span>费用管理</span>
         </el-menu-item>
+        <el-menu-item index="/products">
+          <el-icon><Goods /></el-icon>
+          <span>商品管理</span>
+        </el-menu-item>
         <el-menu-item index="/purchase">
           <el-icon><ShoppingCart /></el-icon>
           <span>采购管理</span>
-        </el-menu-item>
-        <el-menu-item index="/fund">
-          <el-icon><Wallet /></el-icon>
-          <span>资金管理</span>
         </el-menu-item>
         <el-menu-item index="/sales">
           <el-icon><Sell /></el-icon>
           <span>销售管理</span>
         </el-menu-item>
+        <el-menu-item index="/inventory">
+          <el-icon><TrendCharts /></el-icon>
+          <span>库存管理</span>
+        </el-menu-item>
         <el-menu-item index="/ai">
           <el-icon><MagicStick /></el-icon>
-          <span>AI 助手</span>
+          <span>AI 经营分析</span>
         </el-menu-item>
         <el-menu-item index="/rbac">
           <el-icon><Setting /></el-icon>

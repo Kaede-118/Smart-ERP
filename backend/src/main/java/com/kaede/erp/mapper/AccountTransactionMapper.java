@@ -33,6 +33,11 @@ public interface AccountTransactionMapper extends BaseMapper<AccountTransaction>
     List<Map<String, Object>> selectTrend(@Param("since") String since);
 
 
+    @Select("SELECT COALESCE(CAST(after_balance AS DECIMAL(14,2)), 0) FROM account_transaction " +
+            "WHERE create_time < #{since} ORDER BY create_time DESC LIMIT 1")
+    BigDecimal balanceBefore(@Param("since") String since);
+
+
     @Select("SELECT t.* FROM account_transaction t " +
             "WHERE (#{type} IS NULL OR t.change_type = #{type}) " +
             "AND (#{businessType} IS NULL OR t.business_type = #{businessType}) " +

@@ -32,53 +32,67 @@
     </el-row>
 
     <el-card shadow="never" class="chart-card">
-      <template #header><span>余额变化趋势（近7天）</span></template>
+      <template #header>
+        <div class="chart-header">
+          <span>余额变化趋势（近7天）</span>
+          <div class="chart-legend">
+            <span class="legend-item"><span class="legend-dot" style="background:#52c41a" />收入</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#ff4d4f" />支出</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#1677ff" />余额</span>
+          </div>
+        </div>
+      </template>
       <v-chart :option="trendOption" style="height:280px" autoresize />
-    </el-card>
-
-    <el-card shadow="never" class="info-card" style="margin-top:16px">
-      <template #header><span>账户信息</span></template>
-      <el-form :model="form" label-width="100px">
-        <el-form-item label="账户名称"><el-input v-model="form.accountName" /></el-form-item>
-        <el-form-item label="备注"><el-input v-model="form.remark" type="textarea" :rows="2" /></el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="handleUpdate">保存修改</el-button>
-        </el-form-item>
-      </el-form>
     </el-card>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { companyAccountApi } from '../../api'
-import { ElMessage } from 'element-plus'
 import VChart from 'vue-echarts'
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
-import { BarChart } from 'echarts/charts'
+import { BarChart, LineChart } from 'echarts/charts'
 import { GridComponent, TooltipComponent, LegendComponent } from 'echarts/components'
 
-use([CanvasRenderer, BarChart, GridComponent, TooltipComponent, LegendComponent])
+use([CanvasRenderer, BarChart, LineChart, GridComponent, TooltipComponent, LegendComponent])
 
 const account = ref<any>({ balance: 0, accountName: '', remark: '' })
 const todayIncome = ref(0)
 const todayExpense = ref(0)
 const trend = ref<any[]>([])
-const form = reactive({ accountName: '', remark: '' })
 
 const cashflow = computed(() => todayIncome.value - todayExpense.value)
 
 const trendOption = computed(() => ({
   tooltip: { trigger: 'axis' },
-  grid: { left: 60, right: 20, bottom: 30, top: 10 },
+  grid: { left: 70, right: 60, bottom: 30, top: 10 },
   xAxis: { type: 'category', data: trend.value.map(t => t.date?.slice(5) || '') },
-  yAxis: { type: 'value' },
-  series: [
-    { name: '收入', type: 'bar', data: trend.value.map(t => Number(t.income)), color: '#52c41a', barWidth: 12 },
-    { name: '支出', type: 'bar', data: trend.value.map(t => Number(t.expense)), color: '#ff4d4f', barWidth: 12 }
+  yAxis: [
+    { type: 'value', name: '收支' },
+    { type: 'value', name: '余额', position: 'right' }
   ],
-  legend: { right: 10, top: 5 }
+  series: [
+    {
+      name: '收入', type: 'bar',
+      data: trend.value.map(t => Number(t.income)),
+      color: '#52c41a', barWidth: 12, yAxisIndex: 0,
+      label: { show: true, position: 'top', color: '#52c41a', fontSize: 11, formatter: (p: any) => p.value > 0 ? '¥' + p.value : '' }
+    },
+    {
+      name: '支出', type: 'bar',
+      data: trend.value.map(t => Number(t.expense)),
+      color: '#ff4d4f', barWidth: 12, yAxisIndex: 0,
+      label: { show: true, position: 'top', color: '#ff4d4f', fontSize: 11, formatter: (p: any) => p.value > 0 ? '¥' + p.value : '' }
+    },
+    {
+      name: '余额', type: 'line',
+      data: trend.value.map(t => Number(t.balance)),
+      color: '#1677ff', smooth: true, yAxisIndex: 1,
+      label: { show: true, position: 'top', color: '#1677ff', fontSize: 11, formatter: (p: any) => '¥' + p.value }
+    }
+  ]
 }))
 
 async function loadData() {
@@ -87,17 +101,9 @@ async function loadData() {
     companyAccountApi.todayExpense(), companyAccountApi.trend()
   ])
   account.value = a.data
-  form.accountName = a.data.accountName
-  form.remark = a.data.remark || ''
   todayIncome.value = Number(inc.data)
   todayExpense.value = Number(exp.data)
   trend.value = tr.data
-}
-
-async function handleUpdate() {
-  await companyAccountApi.update({ accountName: form.accountName, remark: form.remark })
-  ElMessage.success('修改成功')
-  loadData()
 }
 
 onMounted(() => loadData())
@@ -113,5 +119,8 @@ onMounted(() => loadData())
 .stat-value.income { color: #52c41a; }
 .stat-value.expense { color: #ff4d4f; }
 .chart-card { border-radius: 12px; }
-.info-card { border-radius: 12px; }
+.chart-header { display: flex; align-items: center; justify-content: space-between; }
+.chart-legend { display: flex; gap: 16px; }
+.legend-item { font-size: 13px; color: #666; display: flex; align-items: center; gap: 6px; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
 </style>

@@ -8,6 +8,9 @@
     <el-table :data="orders">
       <el-table-column prop="orderNo" label="销售单号" width="200" />
       <el-table-column prop="customerName" label="客户" />
+      <el-table-column label="内容" min-width="200">
+        <template #default="{ row }">{{ formatItems(row.itemNames, row.itemCount) }}</template>
+      </el-table-column>
       <el-table-column prop="totalAmount" label="金额" width="120">
         <template #default="{ row }">¥{{ row.totalAmount }}</template>
       </el-table-column>
@@ -76,6 +79,14 @@ const detail = ref<any>({})
 const showCreateDialog = ref(false)
 const showDetailDialog = ref(false)
 const form = reactive({ customerId: undefined as number|undefined, productId: undefined as number|undefined, quantity: 1, price: 0 })
+
+function formatItems(names: string | null, count: number) {
+  if (!names) return '--'
+  const items = names.split('|')
+  if (count === 1 && items[0]) return items[0]
+  const firstThree = items.slice(0, 3)
+  return items.length > 3 ? firstThree.join(', ') + '...' : firstThree.join(', ')
+}
 
 async function loadData() {
   const res = await salesApi.orders.list()
