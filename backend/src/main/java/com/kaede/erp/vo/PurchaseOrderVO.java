@@ -34,6 +34,12 @@ public class PurchaseOrderVO {
     private String creatorName;
 
 
+    private String itemNames;
+
+
+    private Long itemCount;
+
+
     private LocalDateTime createTime;
 
 
@@ -56,6 +62,8 @@ public class PurchaseOrderVO {
         vo.setTotalAmount((BigDecimal) map.get("total_amount"));
         vo.setStatus((String) map.get("status"));
         vo.setCreatorName((String) map.get("creator_name"));
+        vo.setItemNames((String) map.get("item_names"));
+        vo.setItemCount(toLong(map.get("item_count")));
         vo.setCreateTime((LocalDateTime) map.get("create_time"));
 
         return vo;

@@ -4,13 +4,13 @@
 
 ```
 backend/          Spring Boot 3.5.12 + Java 21 + Maven（当前唯一运行中的子系统）
-frontend/         空目录（.gitkeep），规划 Vue 3 + TypeScript + Vite + Element Plus
+frontend/         Vue 3 + TypeScript + Vite + Element Plus + Pinia（已初始化）
 docs/             设计文档，开发文档为权威基线
 ```
 
 ## 当前版本
 
-v1.1（AI 扩展）已完成。已完成：
+v1.2（费用管理）已完成。已完成：
 - v0.1：项目初始化、统一返回、全局异常
 - v0.2：Spring Security + JWT 登录认证
 - v0.3：用户管理（CRUD + 重置密码）
@@ -21,8 +21,8 @@ v1.1（AI 扩展）已完成。已完成：
 - v0.8：销售管理（销售单 + 出库 + 库存扣减）
 - v0.9：Dashboard（聚合统计 + 趋势 + 预警 + 热销TOP）
 - v1.0：企业增强（Docker、AOP操作日志、文件上传、Excel导入导出）
-- v1.0：企业增强（Docker、AOP操作日志、文件上传、Excel导入导出）
 - v1.1：AI 扩展（经营分析，只读数据库，不操作业务）
+- v1.2：费用管理（Expense CRUD + 审批流 + 企业账户 + Dashboard 费用摘要 + AI 分析）
 - v1.2：费用管理（Expense CRUD + 审批流 + 企业账户 + Dashboard 费用摘要 + AI 分析）
 
 ### 版本路线
@@ -36,6 +36,7 @@ v0.8 → 销售管理 ✅
 v0.9 → Dashboard ✅
 v1.0 → 企业增强 ✅（Docker、AOP操作日志、文件上传、Excel导入导出）
 v1.1 → AI 扩展（经营分析，只读数据库，不操作业务）✅
+v1.2 → 费用管理（Expense CRUD + 审批流 + 企业账户 + Dashboard 费用摘要 + AI 分析）✅
 ```
 
 ## 开发命令
@@ -138,9 +139,9 @@ Controller 返回 Result<VO>
 
 ## 前端
 
-- 尚未初始化，目录仅有 `.gitkeep`
-- 设计文档中规划技术栈：Vue 3 + TS + Vite + Element Plus + Pinia + ECharts
-- API 基础路径：`/api/`
+- Vue 3 + TypeScript + Vite + Element Plus + Pinia + ECharts
+- API 基础路径：`/api/`（Vite proxy 到 localhost:8080）
+- 已实现页面：登录、Dashboard、商品管理、库存管理、采购管理、销售管理、费用管理、资金管理、AI 经营分析、系统设置
 
 ## 核心设计原则
 

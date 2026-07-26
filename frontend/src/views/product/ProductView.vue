@@ -22,7 +22,16 @@
     <div v-else class="product-grid">
       <el-card v-for="p in list" :key="p.id" shadow="never" class="product-card">
         <div class="card-img" @click="openDetail(p)">
-          <div class="img-placeholder">📷</div>
+          <el-image
+            v-if="p.coverUrl"
+            :src="p.coverUrl"
+            fit="cover"
+            class="product-img"
+            loading="lazy"
+          >
+            <template #error><div class="img-placeholder">📷</div></template>
+          </el-image>
+          <div v-else class="img-placeholder">📷</div>
         </div>
         <div class="card-body" @click="openDetail(p)">
           <div class="card-name">{{ p.name }}</div>
@@ -65,6 +74,20 @@
         <el-form-item label="售价"><el-input-number v-model="createForm.salePrice" :min="0" :precision="2" style="width:100%" /></el-form-item>
         <el-form-item label="成本价"><el-input-number v-model="createForm.costPrice" :min="0" :precision="2" style="width:100%" /></el-form-item>
         <el-form-item label="单位"><el-input v-model="createForm.unit" /></el-form-item>
+        <el-form-item label="商品图片">
+          <el-upload
+            :action="uploadUrl"
+            :headers="uploadHeaders"
+            :on-success="(r) => { createForm.coverUrl = r.data }"
+            :show-file-list="false"
+            accept="image/*"
+          >
+            <el-button size="small">上传图片</el-button>
+            <template #tip>
+              <el-image v-if="createForm.coverUrl" :src="createForm.coverUrl" style="width:80px;height:80px;margin-top:8px;border-radius:6px" fit="cover" />
+            </template>
+          </el-upload>
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="showCreate = false">取消</el-button>
@@ -94,6 +117,20 @@
             <el-radio :value="1">上架</el-radio>
             <el-radio :value="0">下架</el-radio>
           </el-radio-group>
+        </el-form-item>
+        <el-form-item label="商品图片">
+          <el-upload
+            :action="uploadUrl"
+            :headers="uploadHeaders"
+            :on-success="(r) => { editForm.coverUrl = r.data }"
+            :show-file-list="false"
+            accept="image/*"
+          >
+            <el-button size="small">上传图片</el-button>
+            <template #tip>
+              <el-image v-if="editForm.coverUrl" :src="editForm.coverUrl" style="width:80px;height:80px;margin-top:8px;border-radius:6px" fit="cover" />
+            </template>
+          </el-upload>
         </el-form-item>
       </el-form>
       <template #footer>
@@ -150,8 +187,10 @@ const query = reactive({ keyword: '', categoryId: undefined as number | undefine
 const showCreate = ref(false)
 const showEdit = ref(false)
 const showDetail = ref(false)
-const createForm = reactive({ name: '', code: '', categoryId: undefined as number | undefined, salePrice: 0, costPrice: 0, unit: '个' })
-const editForm = reactive({ id: 0, name: '', code: '', categoryId: undefined as number | undefined, salePrice: 0, costPrice: 0, unit: '个', status: 1 })
+const uploadUrl = '/api/files/upload'
+const uploadHeaders = { Authorization: 'Bearer ' + localStorage.getItem('token') }
+const createForm = reactive({ name: '', code: '', categoryId: undefined as number | undefined, salePrice: 0, costPrice: 0, unit: '个', coverUrl: '' })
+const editForm = reactive({ id: 0, name: '', code: '', categoryId: undefined as number | undefined, salePrice: 0, costPrice: 0, unit: '个', status: 1, coverUrl: '' })
 const detail = ref<any>({})
 
 function categoryName(id: number) {
@@ -182,14 +221,14 @@ async function loadInventoryBatch() {
 
 function openCreate() {
   createForm.name = ''; createForm.code = ''; createForm.categoryId = undefined
-  createForm.salePrice = 0; createForm.costPrice = 0; createForm.unit = '个'
+  createForm.salePrice = 0; createForm.costPrice = 0; createForm.unit = '个'; createForm.coverUrl = ''
   showCreate.value = true
 }
 
 function openEdit(p: any) {
   editForm.id = p.id; editForm.name = p.name; editForm.code = p.code
   editForm.categoryId = p.categoryId; editForm.salePrice = p.salePrice
-  editForm.costPrice = p.costPrice; editForm.unit = p.unit; editForm.status = p.status ?? 1
+  editForm.costPrice = p.costPrice; editForm.unit = p.unit; editForm.status = p.status ?? 1; editForm.coverUrl = p.coverUrl || ''
   showEdit.value = true
 }
 
@@ -204,7 +243,12 @@ function editFromDetail() {
 }
 
 async function handleCreate() {
-  await productApi.create(createForm)
+  await productApi.create({
+    name: createForm.name, code: createForm.code,
+    categoryId: createForm.categoryId, salePrice: createForm.salePrice,
+    costPrice: createForm.costPrice, unit: createForm.unit,
+    coverUrl: createForm.coverUrl || undefined
+  })
   ElMessage.success('新增成功')
   showCreate.value = false
   loadData()
@@ -214,7 +258,8 @@ async function handleUpdate() {
   await productApi.update(editForm.id, {
     name: editForm.name, categoryId: editForm.categoryId,
     salePrice: editForm.salePrice, costPrice: editForm.costPrice,
-    unit: editForm.unit, status: editForm.status
+    unit: editForm.unit, status: editForm.status,
+    coverUrl: editForm.coverUrl || undefined
   })
   ElMessage.success('修改成功')
   showEdit.value = false
@@ -262,7 +307,8 @@ onMounted(async () => {
 .product-card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,.08); }
 .product-card:hover .card-actions { opacity: 1; }
 
-.card-img { height: 120px; background: #f5f7fa; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.card-img { height: 120px; background: #f5f7fa; display: flex; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; }
+.product-img { width: 100%; height: 100%; object-fit: cover; }
 .img-placeholder { font-size: 32px; opacity: .4; }
 
 .card-body { padding: 12px 16px; cursor: pointer; }

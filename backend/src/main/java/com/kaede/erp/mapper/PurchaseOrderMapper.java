@@ -15,11 +15,16 @@ import java.util.Map;
 public interface PurchaseOrderMapper extends BaseMapper<PurchaseOrder> {
 
 
-    @Select("SELECT o.*, s.name AS supplier_name, u.nickname AS creator_name " +
+    @Select("SELECT o.*, s.name AS supplier_name, u.nickname AS creator_name, " +
+            "GROUP_CONCAT(p.name SEPARATOR '|') AS item_names, " +
+            "COUNT(pi.id) AS item_count " +
             "FROM purchase_order o " +
             "JOIN supplier s ON o.supplier_id = s.id " +
             "LEFT JOIN sys_user u ON o.creator_id = u.id " +
+            "LEFT JOIN purchase_item pi ON pi.order_id = o.id " +
+            "LEFT JOIN product p ON pi.product_id = p.id " +
             "WHERE o.deleted = 0 " +
+            "GROUP BY o.id " +
             "ORDER BY o.create_time DESC")
     List<Map<String, Object>> selectOrderList();
 

@@ -1,6 +1,18 @@
 # Changelog
 
-## v1.1 (2026-07-27)
+## v1.2 (2026-07-27)
+
+**Expense Management & Company Account**
+
+- 费用管理模块：新增/编辑/审批/驳回/付款 + @OperationLog
+- 企业账户升级：`CompanyAccountService` 统一资金入口（increase/decrease）
+- 资金流水 `account_transaction`：采购/销售/费用自动记录资金变动
+- Dashboard 新增资金摘要（今日收入/支出/现金流 + 余额趋势）
+- AI 经营分析扩展：费用数据 + 现金流上下文
+- 商品管理 UI 完善：编辑/详情/删除确认/库存展示/商品图片
+- 前端资金管理页面：KPI 卡 + 收支趋势图 + 余额折线
+- Header 动态问候语 + 本地时间显示
+- 采购/销售列表新增「内容」列（GROUP_CONCAT 商品名）
 
 **AI Business Analysis**
 

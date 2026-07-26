@@ -22,6 +22,10 @@ Thumbs.db
 
 # Project snapshot
 _ProjectSnapshot.txt
+chatlog*.txt
 
 # Uploads
 backend/uploads/
+
+# Chat exports
+chatlog-*.md

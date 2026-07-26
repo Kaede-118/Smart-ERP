@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard">
     <div class="greeting-card">
-      <h2>👋 上午好，{{ auth.user?.nickname }}</h2>
+      <h2>👋 {{ greetingTime }}，{{ auth.user?.nickname }}</h2>
       <div class="greeting-status">
         <span v-if="warnings.length > 0" class="warning-text">⚠️ 共有 {{ warnings.length }} 条库存预警</span>
         <span v-else class="ok-text">✅ 库存状况良好</span>
@@ -91,6 +91,10 @@ import { GridComponent, TooltipComponent, LegendComponent } from 'echarts/compon
 use([CanvasRenderer, LineChart, BarChart, GridComponent, TooltipComponent, LegendComponent])
 
 const auth = useAuthStore()
+
+const hour = new Date().getHours()
+const greetingTime = hour < 6 ? '凌晨好' : hour < 9 ? '早上好' : hour < 12 ? '上午好' : hour < 14 ? '中午好' : hour < 18 ? '下午好' : '晚上好'
+
 const summary = ref<any>({})
 const warnings = ref<any[]>([])
 const topProducts = ref<any[]>([])
