@@ -10,24 +10,16 @@ docs/             设计文档，开发文档为权威基线
 
 ## 当前版本
 
-v0.3（用户管理）进行中。已完成：
+v0.4（RBAC）已完成。已完成：
 - v0.1：项目初始化、统一返回、全局异常
 - v0.2：Spring Security + JWT 登录认证
-
-### v0.3 待完成
-
-| 模块 | 状态 | 内容 |
-|------|------|------|
-| DTO | ✔ LoginDTO, UserQueryDTO, CreateUserDTO, UpdateUserDTO, ResetPasswordDTO | 新增用户、修改用户、重置密码 |
-| 接口 | ✔ GET /api/users, GET /api/users/{id}, POST, PUT, DELETE, PUT /reset-password | 用户 CRUD 完整 |
-| Service | ✔ list(), getUser(), create(), update(), delete(), resetPassword() | 用户增删改 + 重置密码 |
-| 业务 | ✔ 用户名重复校验、BCrypt 加密、逻辑删除 | 业务完整性 |
+- v0.3：用户管理（CRUD + 重置密码）
+- v0.4：RBAC（角色/权限/分配/Spring Security 动态鉴权）
 
 ### 版本路线
 
 ```
-v0.3 → 用户管理（当前）
-v0.4 → RBAC（角色/权限/菜单，最重要模块）
+v0.4 → RBAC ✅
 v0.5 → 商品管理（分类 + 商品 CRUD）
 v0.6 → 库存管理（ERP 核心，流水追溯）
 v0.7 → 采购管理（采购单 + 入库 + @Transactional）
@@ -69,8 +61,10 @@ v1.1 → AI 扩展（经营分析，只读数据库，不操作业务）
 - **只有 `/api/auth/login` 是公开接口**，其余全部需要 JWT
 - JWT 格式：`Authorization: Bearer <token>`，24 小时过期
 - JWT 密钥硬编码在 `common/security/JwtTokenProvider.java:17-20`（`kaede-erp-system-secret-key-2026-kaede`），不在配置文件中
+- JWT 令牌中嵌入了用户权限列表，Filter 解析 Token 直接设置 `SecurityContext`，**不查数据库**
+- 权限通过 `@EnableMethodSecurity` + `@PreAuthorize("hasAuthority('permission:code')")` 控制
 - `UserContext`（ThreadLocal）在 JWT Filter 的 `finally` 块中清理 —— **不要删除这个清除**
-- 目前所有已认证用户使用同一硬编码角色 `ROLE_USER`，RBAC 尚未实现
+- 登录响应包含 `roles` 和 `permissions` 字段，供前端进行按钮级权限控制
 
 ## 响应格式
 
