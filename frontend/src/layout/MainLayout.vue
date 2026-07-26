@@ -45,7 +45,15 @@
     <el-container>
       <el-header class="header">
         <div class="header-left">
-          <span class="greeting">👋 上午好，{{ auth.user?.nickname }}</span>
+          <div class="header-info">
+            <span class="greeting">👋 上午好，{{ auth.user?.nickname }}</span>
+            <span class="header-divider" />
+            <span class="header-date">{{ dateStr }}</span>
+            <span class="header-weekday">{{ weekdayStr }}</span>
+            <span class="header-divider" />
+            <span class="online-dot" />
+            <span class="online-text">在线</span>
+          </div>
         </div>
         <div class="header-right">
           <el-dropdown>
@@ -62,13 +70,18 @@
         </div>
       </el-header>
       <el-main class="main-content">
-        <router-view />
+        <router-view v-slot="{ Component }">
+          <transition name="fade" mode="out-in">
+            <component :is="Component" />
+          </transition>
+        </router-view>
       </el-main>
     </el-container>
   </el-container>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import {
@@ -79,6 +92,11 @@ import {
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
+
+const weekdays = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
+const now = new Date()
+const dateStr = now.toISOString().slice(0, 10)
+const weekdayStr = weekdays[now.getDay()]
 
 function logout() {
   auth.logout()
@@ -96,7 +114,13 @@ function logout() {
   height: 64px; background: #fff; display: flex; align-items: center;
   justify-content: space-between; padding: 0 24px; border-bottom: 1px solid #f0f0f0;
 }
-.greeting { font-size: 15px; color: #333; }
+.header-info { display: flex; align-items: center; gap: 12px; }
+.greeting { font-size: 15px; color: #333; font-weight: 500; }
+.header-divider { width: 1px; height: 16px; background: #e0e0e0; }
+.header-date { font-size: 13px; color: #999; }
+.header-weekday { font-size: 13px; color: #999; }
+.online-dot { width: 8px; height: 8px; border-radius: 50%; background: #52c41a; }
+.online-text { font-size: 13px; color: #52c41a; }
 .header-right { display: flex; align-items: center; gap: 16px; }
 .user-info { display: flex; align-items: center; gap: 8px; cursor: pointer; }
 .username { font-size: 14px; color: #333; }

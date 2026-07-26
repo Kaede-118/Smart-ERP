@@ -13,9 +13,8 @@
           <el-table-column prop="roleName" label="角色名称" />
           <el-table-column prop="roleCode" label="编码" />
           <el-table-column prop="description" label="描述" />
-          <el-table-column label="操作" width="200">
+          <el-table-column label="操作" width="120">
             <template #default="{ row }">
-              <el-button size="small" @click="editRole(row)">权限</el-button>
               <el-button size="small" type="danger" @click="deleteRole(row.id)">删除</el-button>
             </template>
           </el-table-column>
@@ -102,8 +101,12 @@ async function loadUsers() {
   const res = await userApi.list({ page: 1, size: 50 })
   users.value = res.data.records
   for (const u of users.value) {
-    const r = await userApi.getRoles(u.id)
-    u.roles = r.data || []
+    try {
+      const r = await userApi.getRoles(u.id)
+      u.roles = r.data || []
+    } catch {
+      u.roles = []
+    }
   }
 }
 
@@ -122,7 +125,13 @@ async function handleCreatePerm() {
 }
 
 async function deleteRole(id: number) {
-  await rbacApi.roles.delete(id)
+  try {
+    await rbacApi.roles.delete(id)
+    ElMessage.success('删除成功')
+    loadRoles()
+  } catch {
+    // error already handled by http interceptor
+  }
   ElMessage.success('删除成功')
   loadRoles()
 }

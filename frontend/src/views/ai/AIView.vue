@@ -95,14 +95,14 @@ onMounted(() => loadReports())
 .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
 .page-header h3 { margin: 0; font-size: 18px; }
 .page-actions { display: flex; gap: 8px; }
-.ai-layout { display: grid; grid-template-columns: 280px 1fr; gap: 20px; min-height: 600px; }
-.history-panel { background: #fff; border-radius: 12px; padding: 20px; }
+.ai-layout { display: grid; grid-template-columns: 280px 1fr; gap: 20px; height: calc(100vh - 180px); }
+.history-panel { background: #fff; border-radius: 12px; padding: 20px; overflow-y: auto; }
 .history-panel h4 { margin: 0 0 16px; font-size: 15px; }
 .history-item { padding: 12px; border-radius: 8px; cursor: pointer; margin-bottom: 8px; transition: background .2s; }
 .history-item:hover, .history-item.active { background: #f0f5ff; }
 .history-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
 .history-meta { font-size: 11px; color: #999; }
-.report-panel { background: #fff; border-radius: 12px; padding: 32px; min-height: 600px; }
+.report-panel { background: #fff; border-radius: 12px; padding: 32px; overflow-y: auto; }
 .report-content h2 { margin: 0 0 16px; }
 .report-summary { color: #666; font-size: 14px; line-height: 1.6; }
 .report-body { line-height: 1.8; color: #333; font-size: 14px; }

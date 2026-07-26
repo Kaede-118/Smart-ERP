@@ -37,9 +37,9 @@ public class ProductController {
     }
 
 
-    @GetMapping("/list")
+    @PostMapping("/list")
     public Result<Page<ProductVO>> list(
-            ProductQueryDTO dto
+            @RequestBody ProductQueryDTO dto
     ) {
 
         return Result.success(

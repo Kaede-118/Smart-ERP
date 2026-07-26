@@ -20,6 +20,8 @@ public class GlobalExceptionHandler {
             BusinessException e
     ){
 
+        System.out.println("[BizException] code=" + e.getCode() + " msg=" + e.getMessage());
+
         return Result.error(
                 e.getCode(),
                 e.getMessage()
@@ -33,6 +35,8 @@ public class GlobalExceptionHandler {
     public Result<String> handleAccessDeniedException(
             AccessDeniedException e
     ){
+
+        System.out.println("[Security] AccessDenied: " + e.getMessage());
 
         return Result.error(
                 ResultCode.FORBIDDEN
@@ -53,6 +57,8 @@ public class GlobalExceptionHandler {
                 .reduce((a, b) -> a + "; " + b)
                 .orElse("参数错误");
 
+        System.out.println("[Validation] " + msg);
+
         return Result.error(
                 ResultCode.PARAM_ERROR.getCode(),
                 msg
@@ -66,9 +72,12 @@ public class GlobalExceptionHandler {
             Exception e
     ){
 
+        System.err.println("[SystemError] " + e.getClass().getSimpleName() + ": " + e.getMessage());
+        e.printStackTrace();
+
         return Result.error(
                 ResultCode.SYSTEM_ERROR.getCode(),
-                e.getMessage()
+                e.getClass().getSimpleName() + ": " + e.getMessage()
         );
 
     }
