@@ -2,8 +2,12 @@
   <div class="dashboard">
     <div class="greeting-card">
       <h2>👋 上午好，{{ auth.user?.nickname }}</h2>
-      <p v-if="warnings.length > 0" class="warning-text">⚠️ 共有 {{ warnings.length }} 条库存预警</p>
-      <p v-else class="ok-text">✅ 库存状况良好</p>
+      <div class="greeting-status">
+        <span v-if="warnings.length > 0" class="warning-text">⚠️ 共有 {{ warnings.length }} 条库存预警</span>
+        <span v-else class="ok-text">✅ 库存状况良好</span>
+        <span class="status-divider" />
+        <span class="pending-text" v-if="pendingExpenseCount > 0">📋 {{ pendingExpenseCount }} 条待审批费用</span>
+      </div>
     </div>
 
     <div class="stat-grid">
@@ -93,6 +97,7 @@ const topProducts = ref<any[]>([])
 const trend = ref<any[]>([])
 const aiReport = ref<any>(null)
 const aiLoading = ref(false)
+const pendingExpenseCount = ref(0)
 
 const todayPurchaseTrend = computed(() => {
   const v = Number(summary.value.todayPurchaseAmount)
@@ -151,6 +156,10 @@ onMounted(async () => {
     warnings.value = w.data
     topProducts.value = tp.data
   } catch {}
+  try {
+    const es = await import('../../api').then(m => m.expenseApi.list({ status: 'PENDING' }))
+    pendingExpenseCount.value = es.data.length
+  } catch {}
 })
 </script>
 
@@ -158,8 +167,11 @@ onMounted(async () => {
 .dashboard { max-width: 1200px; margin: 0 auto; }
 .greeting-card { background: #fff; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
 .greeting-card h2 { margin: 0 0 8px; font-size: 20px; }
+.greeting-status { display: flex; align-items: center; gap: 12px; }
 .warning-text { color: #faad14; margin: 0; }
 .ok-text { color: #52c41a; margin: 0; }
+.pending-text { color: #1677ff; margin: 0; }
+.status-divider { width: 1px; height: 14px; background: #e0e0e0; }
 .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 20px; }
 .stat-card { text-align: center; border-radius: 12px; }
 .stat-value { font-size: 28px; font-weight: 700; color: #1677ff; }
