@@ -81,4 +81,19 @@ public class CompanyAccountController {
 
     }
 
+
+    @GetMapping("/transactions")
+    public Result<Map<String, Object>> transactions(
+            @RequestParam(required = false) String type,
+            @RequestParam(required = false) String businessType,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+
+        return Result.success(
+                accountService.listTransactions(type, businessType, page, size)
+        );
+
+    }
+
 }
