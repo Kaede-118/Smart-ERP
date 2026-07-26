@@ -1,4 +1,7 @@
-### 登录获取JWT
+### ============================
+### 登录
+### ============================
+
 POST http://localhost:8080/api/auth/login
 Content-Type: application/json
 
@@ -6,3 +9,31 @@ Content-Type: application/json
   "username": "admin",
   "password": "123456"
 }
+
+> {%
+    // 登录成功后自动保存 Token
+    client.global.set("token", response.body.data.token);
+%}
+
+
+### ============================
+### 获取当前登录用户
+### ============================
+
+GET http://localhost:8080/api/auth/me
+Authorization: Bearer {{token}}
+
+
+### ============================
+### 不带 Token（应返回未登录）
+### ============================
+
+GET http://localhost:8080/api/auth/me
+
+
+### ============================
+### 非法 Token（应返回未登录）
+### ============================
+
+GET http://localhost:8080/api/auth/me
+Authorization: Bearer abcdefg

@@ -1,6 +1,7 @@
 package com.kaede.erp.common.filter;
 
 
+import com.kaede.erp.common.context.UserContext;
 import com.kaede.erp.common.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -35,31 +36,47 @@ public class JwtAuthenticationFilter
             FilterChain filterChain
     ) throws ServletException, IOException {
 
-        String header = request.getHeader("Authorization");
+        try {System.out.println("====== JWT Filter ======");
+            System.out.println(request.getRequestURI());
 
-        if (header != null && header.startsWith("Bearer ")) {
+            String header = request.getHeader("Authorization");
+            System.out.println("Header = " + header);
 
-            String token = header.substring(7);
+            if (header != null && header.startsWith("Bearer ")) {
 
-            if (jwtTokenProvider.validate(token)) {
+                String token = header.substring(7);
 
-                Long userId = jwtTokenProvider.getUserId(token);
+                boolean valid = jwtTokenProvider.validate(token);
+                System.out.println("validate = " + valid);
 
-                System.out.println("JWT验证成功，用户ID：" + userId);
+                if (valid) {
 
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(
-                                userId,
-                                null,
-                                AuthorityUtils.createAuthorityList("ROLE_USER")
-                        );
+                    Long userId = jwtTokenProvider.getUserId(token);
+                    System.out.println("userId = " + userId);
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                    UserContext.setUserId(userId);
+
+                    UsernamePasswordAuthenticationToken authentication =
+                            new UsernamePasswordAuthenticationToken(
+                                    userId,
+                                    null,
+                                    AuthorityUtils.createAuthorityList("ROLE_USER")
+                            );
+
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                    System.out.println("authentication set");
+                }
             }
-        }
 
-        // ⭐ 无论有没有 Token，都继续执行后续过滤器和 Controller
-        filterChain.doFilter(request, response);
+            filterChain.doFilter(request, response);
+
+        } finally {
+
+            UserContext.clear();
+//            SecurityContextHolder.clearContext();
+
+        }
     }
 
 }

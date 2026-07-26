@@ -2,6 +2,9 @@ package com.kaede.erp.config;
 
 
 import com.kaede.erp.common.filter.JwtAuthenticationFilter;
+import com.kaede.erp.common.security.JwtAccessDeniedHandler;
+import com.kaede.erp.common.security.JwtAuthenticationEntryPoint;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -16,20 +19,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 
 @Configuration
+@RequiredArgsConstructor
 public class SecurityConfig {
-
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    private final JwtAuthenticationEntryPoint authenticationEntryPoint;
 
-    public SecurityConfig(
-            JwtAuthenticationFilter jwtAuthenticationFilter
-    ){
+    private final JwtAccessDeniedHandler accessDeniedHandler;
 
-        this.jwtAuthenticationFilter =
-                jwtAuthenticationFilter;
-
-    }
 
 
     @Bean
@@ -75,6 +73,11 @@ public class SecurityConfig {
 
                                 .anyRequest()
                                 .authenticated()
+                ).exceptionHandling(exception ->
+
+                        exception
+                                .authenticationEntryPoint(authenticationEntryPoint)
+                                .accessDeniedHandler(accessDeniedHandler)
                 );
 
 

@@ -5,6 +5,7 @@ import com.kaede.erp.common.result.Result;
 import com.kaede.erp.dto.LoginDTO;
 import com.kaede.erp.service.AuthService;
 import com.kaede.erp.vo.LoginVO;
+import com.kaede.erp.vo.SysUserVO;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,5 +39,9 @@ public class AuthController {
 
         return result;
     }
-
+    @GetMapping("/me")
+    public Result<SysUserVO> me() {
+        System.out.println("进入 me");
+        return Result.success(authService.getCurrentUser());
+    }
 }
