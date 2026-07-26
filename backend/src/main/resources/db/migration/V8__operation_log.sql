@@ -1,0 +1,15 @@
+CREATE TABLE operation_log (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT DEFAULT NULL,
+    username VARCHAR(50) DEFAULT NULL,
+    module VARCHAR(50) NOT NULL,
+    operation VARCHAR(100) NOT NULL,
+    description VARCHAR(255) DEFAULT NULL,
+    request_url VARCHAR(255) DEFAULT NULL,
+    request_method VARCHAR(10) DEFAULT NULL,
+    request_params TEXT DEFAULT NULL,
+    result VARCHAR(20) DEFAULT NULL,
+    duration_ms BIGINT DEFAULT 0,
+    ip VARCHAR(50) DEFAULT NULL,
+    create_time DATETIME DEFAULT CURRENT_TIMESTAMP
+);
