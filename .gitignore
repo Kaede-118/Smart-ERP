@@ -22,3 +22,6 @@ Thumbs.db
 
 # Project snapshot
 _ProjectSnapshot.txt
+
+# Uploads
+backend/uploads/
