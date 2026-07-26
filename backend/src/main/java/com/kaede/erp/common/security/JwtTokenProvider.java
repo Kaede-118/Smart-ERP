@@ -1,12 +1,12 @@
 package com.kaede.erp.common.security;
 
-
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.List;
 
 
 @Component
@@ -21,12 +21,10 @@ public class JwtTokenProvider {
 
 
 
-    /**
-     * 创建Token
-     */
     public String createToken(
             Long userId,
-            String username
+            String username,
+            List<String> permissions
     ){
 
         return Jwts.builder()
@@ -38,6 +36,11 @@ public class JwtTokenProvider {
                 .claim(
                         "username",
                         username
+                )
+
+                .claim(
+                        "permissions",
+                        permissions
                 )
 
                 .issuedAt(
@@ -59,9 +62,6 @@ public class JwtTokenProvider {
 
 
 
-    /**
-     * 获取用户ID
-     */
     public Long getUserId(
             String token
     ){
@@ -82,9 +82,24 @@ public class JwtTokenProvider {
 
 
 
-    /**
-     * 校验Token
-     */
+    @SuppressWarnings("unchecked")
+    public List<String> getPermissions(
+            String token
+    ){
+
+        Claims claims =
+                Jwts.parser()
+                        .verifyWith(key)
+                        .build()
+                        .parseSignedClaims(token)
+                        .getPayload();
+
+        return claims.get("permissions", List.class);
+
+    }
+
+
+
     public boolean validate(
             String token
     ){

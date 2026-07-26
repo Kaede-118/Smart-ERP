@@ -5,10 +5,10 @@ import com.kaede.erp.common.context.UserContext;
 import com.kaede.erp.common.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.security.core.authority.AuthorityUtils;
 
 
 import jakarta.servlet.FilterChain;
@@ -17,6 +17,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.List;
 
 
 @Component
@@ -54,18 +55,23 @@ public class JwtAuthenticationFilter
                     Long userId = jwtTokenProvider.getUserId(token);
                     System.out.println("userId = " + userId);
 
+                    List<String> permissions =
+                            jwtTokenProvider.getPermissions(token);
+
                     UserContext.setUserId(userId);
 
                     UsernamePasswordAuthenticationToken authentication =
                             new UsernamePasswordAuthenticationToken(
                                     userId,
                                     null,
-                                    AuthorityUtils.createAuthorityList("ROLE_USER")
+                                    permissions.stream()
+                                            .map(SimpleGrantedAuthority::new)
+                                            .toList()
                             );
 
                     SecurityContextHolder.getContext().setAuthentication(authentication);
 
-                    System.out.println("authentication set");
+                    System.out.println("authentication set with " + permissions.size() + " permissions");
                 }
             }
 
@@ -74,7 +80,6 @@ public class JwtAuthenticationFilter
         } finally {
 
             UserContext.clear();
-//            SecurityContextHolder.clearContext();
 
         }
     }

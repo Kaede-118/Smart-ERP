@@ -3,6 +3,8 @@ import com.kaede.erp.vo.SysUserVO;
 
 import lombok.Data;
 
+import java.util.List;
+
 
 @Data
 public class LoginVO {
@@ -18,5 +20,17 @@ public class LoginVO {
      * 用户信息
      */
     private SysUserVO user;
+
+
+    /**
+     * 角色列表
+     */
+    private List<String> roles;
+
+
+    /**
+     * 权限列表
+     */
+    private List<String> permissions;
 
 }

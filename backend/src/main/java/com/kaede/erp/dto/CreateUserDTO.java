@@ -12,7 +12,7 @@ public class CreateUserDTO {
     @NotBlank(message = "密码不能为空")
     private String password;
 
-    @NotBlank(message = "昵称不能为空")
+    @NotBlank(message = "昵称不能为空") 
     private String nickname;
 
     /**

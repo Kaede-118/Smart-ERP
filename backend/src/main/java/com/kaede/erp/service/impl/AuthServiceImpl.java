@@ -8,6 +8,7 @@ import com.kaede.erp.common.security.JwtTokenProvider;
 import com.kaede.erp.common.security.SecurityUser;
 import com.kaede.erp.dto.LoginDTO;
 import com.kaede.erp.entity.SysUser;
+import com.kaede.erp.mapper.RBACMapper;
 import com.kaede.erp.mapper.SysUserMapper;
 import com.kaede.erp.service.AuthService;
 import com.kaede.erp.vo.LoginVO;
@@ -15,8 +16,9 @@ import com.kaede.erp.vo.SysUserVO;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 
 @RequiredArgsConstructor
@@ -27,6 +29,8 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
 
     private final JwtTokenProvider jwtTokenProvider;
+
+    private final RBACMapper rbacMapper;
 
     @Override
     public SysUserVO getCurrentUser() {
@@ -79,7 +83,8 @@ public class AuthServiceImpl implements AuthService {
         String token =
                 jwtTokenProvider.createToken(
                         user.getId(),
-                        user.getUsername()
+                        user.getUsername(),
+                        user.getPermissionCodes()
                 );
 
 
@@ -88,6 +93,10 @@ public class AuthServiceImpl implements AuthService {
 
 
         vo.setToken(token);
+
+        vo.setRoles(user.getRoleCodes());
+
+        vo.setPermissions(user.getPermissionCodes());
 
 
 

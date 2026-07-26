@@ -11,6 +11,7 @@ import com.kaede.erp.service.SysRoleService;
 import com.kaede.erp.vo.SysPermissionVO;
 import com.kaede.erp.vo.SysRoleVO;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -42,6 +43,7 @@ public class RoleController {
 
 
     @GetMapping
+    @PreAuthorize("hasAuthority('role:list')")
     public Result<Page<SysRoleVO>> list(
             RoleQueryDTO dto
     ) {
