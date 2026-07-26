@@ -335,5 +335,20 @@
 | 58 | POST | `/api/ai/reports` | AI |
 | 59 | GET | `/api/ai/reports` | AI |
 | 60 | GET | `/api/ai/reports/{id}` | AI |
+| 61 | GET | `/api/expenses` | 费用 |
+| 62 | GET | `/api/expenses/{id}` | 费用 |
+| 63 | POST | `/api/expenses` | 费用 |
+| 64 | PUT | `/api/expenses/{id}` | 费用 |
+| 65 | DELETE | `/api/expenses/{id}` | 费用 |
+| 66 | POST | `/api/expenses/{id}/approve` | 费用 |
+| 67 | POST | `/api/expenses/{id}/reject` | 费用 |
+| 68 | POST | `/api/expenses/{id}/pay` | 费用 |
+| 69 | GET | `/api/company-account` | 资金 |
+| 70 | PUT | `/api/company-account` | 资金 |
+| 71 | GET | `/api/company-account/today-income` | 资金 |
+| 72 | GET | `/api/company-account/today-expense` | 资金 |
+| 73 | GET | `/api/company-account/trend` | 资金 |
+| 74 | GET | `/api/company-account/transactions` | 资金 |
+| 75 | GET | `/api/dashboard/expense-summary` | Dashboard |
 
-共 **60 个端点**，覆盖 11 个模块。
+共 **75 个端点**，覆盖 13 个模块。

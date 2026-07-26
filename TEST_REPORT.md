@@ -17,6 +17,8 @@
 | `dashboard.http` | 4 | 摘要、趋势、预警、热销 | — |
 | `enterprise.http` | 5 | 文件上传、Excel | 非法文件、空参数 |
 | `ai.http` | 8 | AI 报告生成、历史、详情 | 空参数、非法 type、长范围、404 |
+| `expense.http` | 9 | 费用 CRUD、审批、驳回、付款 | 状态流转 |
+| `company-account.http` | 9 | 企业账户、流水、采购/销售资金联动 | 余额不足 |
 | **smoke.http** | 8 | 跨模块冒烟 | 401 验证 |
 | **regression.http** | 40+ | 全量回归 | 含所有边界用例 |
 
