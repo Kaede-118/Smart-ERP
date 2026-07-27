@@ -43,12 +43,15 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { aiApi } from '../../api'
 import { ElMessage } from 'element-plus'
 
+const route = useRoute()
+
 const reports = ref<any[]>([])
 const currentReport = ref<any>(null)
-const currentId = ref<number>()
+const currentId = ref<string | number>()
 const generating = ref(false)
 const reportType = ref('OVERVIEW')
 
@@ -70,7 +73,7 @@ async function loadReports() {
   reports.value = res.data
 }
 
-async function loadReport(id: number) {
+async function loadReport(id: string | number) {
   currentId.value = id
   const res = await aiApi.detail(id)
   currentReport.value = res.data
@@ -87,7 +90,13 @@ async function generateReport() {
   } finally { generating.value = false }
 }
 
-onMounted(() => loadReports())
+onMounted(async () => {
+  await loadReports()
+  const id = route.query.id
+  if (id) {
+    loadReport(id as string)
+  }
+})
 </script>
 
 <style scoped>

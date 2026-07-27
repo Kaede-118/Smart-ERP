@@ -50,9 +50,10 @@
           <el-progress :percentage="90" :stroke-width="6" :show-text="false" :format="()=>''" color="#1677ff" indeterminate />
         </div>
         <div v-else-if="aiReport" class="ai-preview">
-          <h4>{{ aiReport.title }}</h4>
-          <p class="ai-summary">{{ aiReport.summary }}</p>
-          <el-button size="small" text type="primary" @click="$router.push('/ai')">查看完整报告 →</el-button>
+          <p class="ai-summary-lead">{{ aiReport.summary }}</p>
+          <div class="ai-content-truncated" v-html="renderMarkdown(aiReport.content || '')" />
+          <div class="ai-content-fade" />
+          <el-button size="small" text type="primary" class="ai-full-btn" @click="$router.push('/ai?id=' + aiReport.id)">查看完整报告 →</el-button>
         </div>
         <div v-else class="ai-empty">
           <p>点击生成获取今日经营建议</p>
@@ -103,6 +104,17 @@ const aiReport = ref<any>(null)
 const aiLoading = ref(false)
 const pendingExpenseCount = ref(0)
 
+function renderMarkdown(text: string) {
+  if (!text) return ''
+  return text
+    .replace(/### (.+)/g, '<h4>$1</h4>')
+    .replace(/## (.+)/g, '<h3>$1</h3>')
+    .replace(/# (.+)/g, '<h2>$1</h2>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n-/g, '<br>-')
+    .replace(/\n/g, '<br>')
+}
+
 const todayPurchaseTrend = computed(() => {
   const v = Number(summary.value.todayPurchaseAmount)
   return v > 0 ? 'up' : v < 0 ? 'down' : ''
@@ -140,6 +152,14 @@ const topOption = computed(() => ({
   series: [{ type: 'bar', data: topProducts.value.map(p => p.saleQuantity), color: '#1677ff', barWidth: 24 }]
 }))
 
+async function loadLatestAIReport() {
+  try {
+    const res = await aiApi.list()
+    const overview = res.data?.find((r: any) => r.type === 'OVERVIEW')
+    if (overview) aiReport.value = overview
+  } catch {}
+}
+
 async function generateAI() {
   aiLoading.value = true
   aiReport.value = null
@@ -164,6 +184,7 @@ onMounted(async () => {
     const es = await import('../../api').then(m => m.expenseApi.list({ status: 'PENDING' }))
     pendingExpenseCount.value = es.data.length
   } catch {}
+  await loadLatestAIReport()
 })
 </script>
 
@@ -187,7 +208,9 @@ onMounted(async () => {
 .chart-card { border-radius: 12px; }
 .ai-loading { text-align: center; padding: 40px 20px; }
 .ai-loading-text { font-size: 15px; color: #1677ff; margin-bottom: 16px; }
-.ai-preview h4 { margin: 0 0 8px; font-size: 15px; }
-.ai-summary { color: #666; font-size: 13px; line-height: 1.6; margin: 0 0 8px; }
+.ai-preview { position: relative; }
+.ai-summary-lead { font-size: 16px; font-weight: 700; line-height: 1.6; margin: 0 0 12px; color: #333; }
+.ai-content-truncated { font-size: 13px; line-height: 1.7; color: #555; max-height: 240px; overflow-y: auto; }
+.ai-full-btn { margin-top: 4px; }
 .ai-empty { text-align: center; padding: 40px 0; color: #999; }
 </style>

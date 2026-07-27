@@ -11,6 +11,7 @@ import com.kaede.erp.entity.AiReport;
 import com.kaede.erp.mapper.AiReportMapper;
 import org.springframework.stereotype.Service;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import java.util.List;
 import java.util.Map;
 
@@ -106,8 +107,10 @@ public class AiService {
 
     public List<AiReportResponse> listReports() {
 
-        return reportMapper.selectList(null)
-                .stream()
+        return reportMapper.selectList(
+                        new QueryWrapper<AiReport>()
+                                .orderByDesc("id")
+                ).stream()
                 .map(this::toResponse)
                 .toList();
     }

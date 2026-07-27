@@ -78,6 +78,19 @@ export const inventoryApi = {
   },
   records(params?: { productId?: number; type?: string }) {
     return http.get<any, ApiResponse<any[]>>('/inventory/records', { params })
+  },
+  exportExcel() {
+    const token = localStorage.getItem('token')
+    fetch('/api/excel/inventory/export', { headers: { Authorization: 'Bearer ' + token } })
+      .then(r => r.blob())
+      .then(blob => {
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = '库存数据.xlsx'
+        a.click()
+        URL.revokeObjectURL(url)
+      })
   }
 }
 
@@ -92,7 +105,20 @@ export const purchaseApi = {
     list() { return http.get<any, ApiResponse<any[]>>('/purchase/orders') },
     detail(id: number) { return http.get<any, ApiResponse<any>>(`/purchase/orders/${id}`) },
     create(data: any) { return http.post<any, ApiResponse<any>>('/purchase/orders', data) },
-    receive(id: number) { return http.post<any, ApiResponse<null>>(`/purchase/orders/${id}/receive`) }
+    receive(id: number) { return http.post<any, ApiResponse<null>>(`/purchase/orders/${id}/receive`) },
+    exportExcel() {
+      const token = localStorage.getItem('token')
+      fetch('/api/excel/purchase/export', { headers: { Authorization: 'Bearer ' + token } })
+        .then(r => r.blob())
+        .then(blob => {
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = '采购数据.xlsx'
+          a.click()
+          URL.revokeObjectURL(url)
+        })
+    }
   }
 }
 
@@ -107,7 +133,20 @@ export const salesApi = {
     list() { return http.get<any, ApiResponse<any[]>>('/sales/orders') },
     detail(id: number) { return http.get<any, ApiResponse<any>>(`/sales/orders/${id}`) },
     create(data: any) { return http.post<any, ApiResponse<any>>('/sales/orders', data) },
-    complete(id: number) { return http.post<any, ApiResponse<null>>(`/sales/orders/${id}/complete`) }
+    complete(id: number) { return http.post<any, ApiResponse<null>>(`/sales/orders/${id}/complete`) },
+    exportExcel() {
+      const token = localStorage.getItem('token')
+      fetch('/api/excel/sales/export', { headers: { Authorization: 'Bearer ' + token } })
+        .then(r => r.blob())
+        .then(blob => {
+          const url = URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.href = url
+          a.download = '销售数据.xlsx'
+          a.click()
+          URL.revokeObjectURL(url)
+        })
+    }
   }
 }
 

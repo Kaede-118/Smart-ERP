@@ -5,6 +5,7 @@
       <div class="page-actions">
         <el-input v-model="keyword" placeholder="搜索商品" clearable @keyup.enter="loadData" style="width:200px" />
         <el-button type="primary" @click="loadData">搜索</el-button>
+        <el-button @click="inventoryApi.exportExcel()">导出 Excel</el-button>
       </div>
     </div>
 
@@ -41,7 +42,7 @@
         <span class="stock-unit">当前库存</span>
       </div>
       <div class="detail-actions">
-        <el-input-number v-model="changeQty" :min="-1000" :max="1000" style="width:160px" />
+        <el-input-number v-model="changeQty" style="width:160px" />
         <el-button type="primary" :disabled="changeQty === 0" @click="handleAdjust">调整库存</el-button>
       </div>
       <el-divider />

@@ -2,7 +2,10 @@
   <div class="page">
     <div class="page-header">
       <h3>销售管理</h3>
-      <el-button type="primary" @click="showCreateDialog = true">新建销售单</el-button>
+      <div class="page-actions">
+        <el-button @click="salesApi.orders.exportExcel()">导出 Excel</el-button>
+        <el-button type="primary" @click="showCreateDialog = true">新建销售单</el-button>
+      </div>
     </div>
 
     <el-table :data="orders">

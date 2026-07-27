@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -52,6 +53,28 @@ public class FileController {
         String url = "/api/files/" + filename;
 
         return Result.success(url);
+
+    }
+
+    @GetMapping("/{filename}")
+    public void download(
+            @PathVariable String filename,
+            HttpServletResponse response
+    ) throws IOException {
+
+        Path file = Path.of(uploadDir).toAbsolutePath().normalize().resolve(filename);
+
+        if (!Files.exists(file)) {
+            response.setStatus(404);
+            return;
+        }
+
+        String contentType = Files.probeContentType(file);
+        if (contentType != null) {
+            response.setContentType(contentType);
+        }
+
+        Files.copy(file, response.getOutputStream());
 
     }
 
